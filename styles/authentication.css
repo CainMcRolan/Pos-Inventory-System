@@ -1,0 +1,35 @@
+body {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   text-align: center;
+}
+
+.container, .container-2 {
+   border: 2px inset black;
+   height: 300px;
+   width: 300px;
+}
+
+.container > form {
+   height: 100%;
+   width: 100%;
+   display: grid;
+   grid-template-rows: repeat(3, 1fr);
+}
+
+.container-2 > form {
+   height: 100%;
+   width: 100%;
+   display: grid;
+   grid-template-rows: repeat(5, 1fr);
+}
+
+.inputs {
+   padding: 10px;
+   font-size: 1rem;
+}
+
