@@ -462,18 +462,19 @@
 	grid-column: 1 / 5;
 	display: grid;
 	padding: 10px;
-	grid-template: 1fr 9fr / 8fr 1fr 1fr;
+	grid-template: 1fr 9fr / 9fr 1fr;
 	gap: 0px 10px; 
 }
 
 .purchase-table {
 	grid-column: span 3;
 	display: grid;
-	grid-template-columns: repeat(9, 1fr);
+	grid-template-columns: repeat(10, 1fr);
 	grid-template-rows: 3rem;
 	grid-auto-rows: 2rem;
 	gap: 3px;
 	overflow: auto;
+	
 }
 
 .purchase-table > div {
@@ -485,28 +486,14 @@
 	color: white;
 	font-size: 0.9rem;
 	font-weight: bold;
+	display: flex;
+	justify-content: center;
 }
 
-
-.purchase-table > div:nth-child(n+10) {
+.purchase-table > div:nth-child(n+11) {
 	background-color: var(--app-content-secondary-color);
-	color: white;
+	color: var(--app-content-main-color);
 	font-size: 0.9rem;
-}
-
-.dialog1 {
-	background-color: var(--app-content-secondary-color);
-	width: 80%;
-   height: 80%;
-   position: absolute;
-   top: 50%;
-   left: 50%;
-   transform: translate(-50%, -50%);
-	border: 1px solid var(--app-content-main-color);
-}
-
-.dialog1::backdrop {
-   background-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Solely for Purchase PHP */
@@ -650,6 +637,76 @@
 }
 
 /* Solely for Inventory */
+
+/* Solely for Admin Requests */
+
+.request-container{
+	margin-top: 20px;
+	color: var(--app-content-main-color);
+	display: grid;
+	grid-template: 1fr 5fr / repeat(4, 1fr);
+	height: 90vh;
+	gap: 20px;
+}
+
+.requests, .total-amount, .total-paid-amount, .total-purchase-due {
+	background-color: var(--app-content-secondary-color);
+	display: grid;
+	align-items: center;
+	padding: 30px;
+	justify-content: start;
+}
+
+.request-container > div > h1 {
+	font-weight: bold;
+}
+
+.request-container > div > p {
+	font-size: 0.9rem;
+}
+
+.request-list {
+	background-color: var(--app-content-secondary-color);
+	grid-column: 1 / 5;
+	display: grid;
+	padding: 10px;
+	grid-template: 1fr 9fr / 9fr 1fr;
+	gap: 0px 10px; 
+}
+
+.request-table {
+	grid-column: span 3;
+	display: grid;
+	grid-template-columns: 0.5fr repeat(5, 1fr) repeat(2, 0.5fr);
+	grid-template-rows: 3rem;
+	grid-auto-rows: 3rem;
+	gap: 3px;
+	overflow: auto;
+}
+
+.request-table > div {
+	justify-content: center;
+	padding: 5px;
+	align-items: center;
+	display: flex;
+	background-color: var(--action-color);
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: white;
+	text-align: center;
+}
+
+.request-table > div:nth-child(n+9) {
+	background-color: var(--app-content-secondary-color);
+	color: var(--app-content-main-color);
+	font-size: 0.9rem;
+}
+
+.accept-form, .accept-button {
+	width: 5rem;
+}
+
+/* Solely for Admin Requests */
 
  .tableView .products-header {
 	 display: flex;

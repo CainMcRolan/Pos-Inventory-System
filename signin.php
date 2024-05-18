@@ -18,12 +18,15 @@
             $_SESSION['id'] = $row['id'];
             $_SESSION['username'] = $signin_username;
 
-            if ($row['is_admin']) {
+            if ($row['is_admin'] === 'admin') {
                $_SESSION['is_admin'] = $row['is_admin'];
                header('Location: ./build/admin/admin-purchase.php');
                exit();
-            } else if ($row['is_admin'] == 0) {
+            } else if ($row['is_admin'] == 'user') {
                header('Location: ./build/user/home-user.php');
+               exit();
+            } else if ($row['is_admin'] == 'purchase') {
+               header('Location: ./build/purchase/home-purchase.php');
                exit();
             }
          } else {

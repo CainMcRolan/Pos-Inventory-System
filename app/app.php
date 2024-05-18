@@ -6,3 +6,7 @@ function titleCase($string) {
    $string = ucwords($string);
    return $string;
 }
+
+function generateSecureUniqueCode($length = 6) {
+   return bin2hex(random_bytes($length));
+}

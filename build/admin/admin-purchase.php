@@ -12,6 +12,78 @@
    $loop = mysqli_fetch_assoc($result);
 
    $username = titleCase($_SESSION['username']);
+
+   if (isset($_POST['request_submit'])) {
+      $request_code = mysqli_real_escape_string($connection, $_POST['request_code']);
+      $request_status = 'paid';
+
+      //Handle data insertion
+      $query = "UPDATE request SET status = '$request_status' WHERE code = '$request_code'";
+      $result = mysqli_query($connection, $query);
+
+      if ($result) {
+      // Retrieve the row from the request table
+      $query = "SELECT code, name, price, quantity FROM request WHERE code = '$request_code'";
+      $result = mysqli_query($connection, $query);
+
+      if ($result && mysqli_num_rows($result) > 0) {
+         $row = mysqli_fetch_assoc($result);
+         $code = mysqli_real_escape_string($connection, $row['code']);
+         $name = mysqli_real_escape_string($connection, $row['name']);
+         $price = mysqli_real_escape_string($connection, $row['price']);
+         $quantity = mysqli_real_escape_string($connection, $row['quantity']);
+
+         $query = "INSERT INTO product (code, name, price, delivery, current_stock) VALUES ('$code', '$name', '$price', '$quantity', '$quantity')";
+         $result = mysqli_query($connection, $query);
+
+         if ($result) {
+               header('Location: admin-purchase.php');
+               exit();
+         } else {
+               echo "Error: " . mysqli_error($connection);
+         }
+      } else {
+         echo "Error: No matching request found.";
+      }
+   } else {
+      echo "Error: " . mysqli_error($connection);
+   }
+   }
+
+   //Handles Total Variables
+   $result = mysqli_query($connection, "select * from request where status = 'request'");
+   $pendingRequest = 0;
+ 
+   if ($result) {
+      $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
+      foreach($categoryArray as $items) {
+         $pendingRequest++;
+      }
+   }
+
+   $result = mysqli_query($connection, "select * from request where status = 'paid'");
+   $totalPaid = 0;
+
+   if ($result) {
+      $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
+      foreach($categoryArray as $items) {
+         $totalPaid++;
+      }
+   }
+
+   $result = mysqli_query($connection, "select * from request where status = 'pending'");
+   $totalPending = 0;
+   $accountPayable = 0;
+
+   if ($result) {
+      $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
+      foreach($categoryArray as $items) {
+         $totalPending++;
+         $accountPayable += (int) $items['price'] * (int) $items['quantity'];
+      }
+   }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -86,35 +158,68 @@
         </div>
         <div class="purchase-container">
             <div class="requests waveeffect">
-               <h1>10</h1>
+               <h1><?= $pendingRequest ?></h1>
                <p class="">Requests</p>
             </div>
             <div class="total-amount waveeffect">
-               <h1>10</h1>
-               <p class="">Total Amount</p>
+               <h1><?= $totalPending ?></h1>
+               <p class="">Total Pending</p>
             </div>
             <div class="total-paid-amount waveeffect">
-               <h1>10</h1>
-               <p class="">Total Paid Amount</p>
+               <h1><?= $totalPaid ?></h1>
+               <p class="">Total Paid</p>
             </div>
             <div class="total-purchase-due waveeffect">
-               <h1>10</h1>
-               <p class="">Total Purchase Due</p>
+               <h1><?= '₱' . $accountPayable ?></h1>
+               <p class="">Total Account Payable</p>
             </div>
             <div class="purchase-list">
                <h1>Purchase List</h1>
                <button class="app-content-headerButton">Print Record</button>
-               <button class="app-content-headerButton new-purchase">New Purchase</button>
                <div class="purchase-table">
                   <div>Purchase Date</div>
+                  <div>Payment Status</div>
                   <div>Purchase Code</div>
-                  <div>Delivery Status</div>
-                  <div>Supplier Name</div>
+                  <div>Item Name</div>
+                  <div>Quantity</div>
+                  <div>Price</div>
                   <div>Supplier Name</div>
                   <div>Created By</div>
                   <div>Account Payable</div>
-                  <div>Payment Status</div>
                   <div>Action</div>
+                  <?php 
+                     //Display Products 
+                     $query = 'SELECT * FROM request';
+
+                     $result = mysqli_query($connection, $query);
+
+                     if ($result) {
+                        if (mysqli_num_rows($result) > 0) {
+                            while ($row = mysqli_fetch_assoc($result)) {
+                              if ($row['status'] == 'pending' || $row['status'] == 'paid' ) {
+                                 echo "<div>" . $row['date'] . "</div>";
+                                 echo "<div>" . $row['status'] . "</div>";
+                                 echo "<div>" . $row['code'] . "</div>";
+                                 echo "<div>" . $row['name'] . "</div>";
+                                 echo "<div>" . $row['quantity'] . "</div>";
+                                 echo "<div>" . '₱' . $row['price'] . "</div>";
+                                 echo "<div>" . $row['supplier'] . "</div>";
+                                 echo "<div>" . 'Purchase Officer' . "</div>";
+                                 echo "<div>" . '₱' . (int) $row['price'] * (int) $row['quantity'] . "</div>";
+                                 echo "<div>
+                                          <form action='{$_SERVER['PHP_SELF']}' method='POST' class='myForm new-product-form accept-form'> 
+                                             <input type='hidden' value='{$row['code']}' name='request_code'>
+                                             <input type='submit' class='app-content-headerButton-red edit-button accept-button'  value='Pay' name='request_submit'>
+                                          </form>
+                                       </div>";
+                              }
+                              
+                            }
+                        } 
+                     } else {
+                           echo "Error: " . mysqli_error($connection);
+                     }
+                  ?>
                </div>
             </div>
         </div>
@@ -131,13 +236,6 @@
          document.documentElement.classList.toggle('light');
          modeSwitch.classList.toggle('active');
       });
-
-      const toggleButton = document.querySelector('.new-purchase');
-      const dialog =document.querySelector('.dialog');
-      toggleButton.addEventListener('click', () => {
-         dialog.showModal();
-         console.log('hi');
-      })
 
       document.querySelector('.requests').addEventListener('click', () => {
          window.location.href = 'admin-request.php';
