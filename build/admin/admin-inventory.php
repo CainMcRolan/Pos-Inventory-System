@@ -8,10 +8,73 @@
       exit();
    }
 
-   $result = mysqli_query($connection, "SELECT * FROM user WHERE id = {$_SESSION['id']}");
-   $loop = mysqli_fetch_assoc($result);
+   function generateSecureUniqueCode($length = 6) {
+      return bin2hex(random_bytes($length));
+   }
+
+   //Delete Function 
+   if (isset($_POST['product_delete'])) {
+      $delete_code = mysqli_real_escape_string($connection, $_POST['delete_code']);
+      $query = "DELETE FROM product WHERE code = '{$delete_code}'";
+      $result = mysqli_query($connection, $query);
+      if ($result) {
+          header("Location: {$_SERVER['PHP_SELF']}");
+          exit();
+      } else {
+          echo "Error: " . mysqli_error($connection);
+      }
+  }
+
 
    $username = titleCase($_SESSION['username']);
+
+   if (isset($_POST['product_submit'])) {
+      $code = generateSecureUniqueCode($length = 6);
+      $product_name = mysqli_real_escape_string($connection, $_POST['product_name']);
+      $product_price = mysqli_real_escape_string($connection, $_POST['product_price']);
+      $product_category = mysqli_real_escape_string($connection, $_POST['product_category']);
+      $product_description = mysqli_real_escape_string($connection, $_POST['product_description']);
+      $product_stock = mysqli_real_escape_string($connection, $_POST['product_stock']);
+      $product_count = mysqli_real_escape_string($connection, $_POST['product_count']);
+      $product_delivery = mysqli_real_escape_string($connection, $_POST['product_delivery']);
+      $product_transfer = mysqli_real_escape_string($connection, $_POST['product_transfer']);
+      $product_wasteges = mysqli_real_escape_string($connection, $_POST['product_wasteges']);
+      $product_pullout = mysqli_real_escape_string($connection, $_POST['product_pullout']);
+      $product_return = mysqli_real_escape_string($connection, $_POST['product_return']);
+      $variance = (int) $product_stock - (int) $product_count;
+
+      $query = "INSERT INTO product (code, name, category, price, current_stock, physical_count, delivery, transfer, wasteges, pull_out, returns, variance, description) VALUES ('{$code}', '{$product_name}', '{$product_category}', '{$product_price}', '{$product_stock}', '{$product_count}', '{$product_delivery}', '{$product_transfer}', '{$product_wasteges}', '{$product_pullout}', '{$product_return}', '{$variance}', '{$product_description}')";
+
+      $result = mysqli_query($connection, $query);
+
+      if ($result) {
+         echo "Sign up successful!";
+         header('Location: admin-inventory.php');
+         exit();
+      } else {
+         echo "Error: " . mysqli_error($connection);
+      }
+   }
+
+   $result = mysqli_query($connection, 'select * from product');
+   $totalItems = 0;
+   $totalStocks = 0;
+   $totalCategories = 0;
+   $totalItemPrice = 0;
+   $categories = [];
+
+   if ($result) {
+      $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
+      foreach($categoryArray as $items) {
+         $totalItems++;
+         $totalStocks += (int) $items['current_stock'];
+         $totalItemPrice += (int) $items['price'] * (int) $items['current_stock'];
+         $categories[] = $items['category'];
+      }
+
+      $uniqueCategories = array_unique($categories);
+      $totalCategories = count($uniqueCategories);
+   }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -86,19 +149,19 @@
         </div>
         <div class="inventory-container">
             <div class="requests waveeffect">
-               <h1>10</h1>
+               <h1><?= $totalItems; ?></h1>
                <p class="">Total Items</p>
             </div>
             <div class="total-amount waveeffect">
-               <h1>10</h1>
+               <h1><?= $totalStocks ?></h1>
                <p class="">Total Stocks</p>
             </div>
             <div class="total-paid-amount waveeffect">
-               <h1>10</h1>
+               <h1><?= $totalCategories ?></h1>
                <p class="">Categories</p>
             </div>
             <div class="total-purchase-due waveeffect">
-               <h1>10</h1>
+               <h1><?= '₱' . $totalItemPrice ?></h1>
                <p class="">All Items Total Price</p>
             </div>
             <div class="inventory-list">
@@ -110,6 +173,7 @@
                   <div>Image</div>
                   <div>Item Name</div>
                   <div>Category</div>
+                  <div>Price</div>
                   <div>Current Stock</div>
                   <div>Physical Count</div>
                   <div>Delivery</div>
@@ -117,13 +181,49 @@
                   <div>Wasteges</div>
                   <div>Pull Out</div>
                   <div>Returns</div>
-                  <div>Variance</div>
-                  <div>Action</div>
+                  <div>Variance</div>  
+                  <div>Edit</div>
+                  <div>Delete</div>
+                  <?php 
+                     $query = 'SELECT * FROM product';
+
+                     $result = mysqli_query($connection, $query);
+
+                     if ($result) {
+                        if (mysqli_num_rows($result) > 0) {
+                            while ($row = mysqli_fetch_assoc($result)) {
+                              echo "<div>" . $row['code'] . "</div>";
+                              echo "<div>" . $row['image'] . "</div>";
+                              echo "<div>" . $row['name'] . "</div>";
+                              echo "<div>" . $row['category'] . "</div>";
+                              echo "<div>" . '₱' . $row['price'] . "</div>";
+                              echo "<div>" . $row['current_stock'] . "</div>";
+                              echo "<div>" . $row['physical_count'] . "</div>";
+                              echo "<div>" . $row['delivery'] . "</div>";
+                              echo "<div>" . $row['transfer'] . "</div>";
+                              echo "<div>" . $row['wasteges'] . "</div>";
+                              echo "<div>" . $row['pull_out'] . "</div>";
+                              echo "<div>" . $row['returns'] . "</div>";
+                              echo "<div>" . $row['variance'] . "</div>";
+                              echo "<div><button class='app-content-headerButton-green edit-button'' data-code='{$row['code']}'>Edit</button> </div>";
+                              echo "<div>
+                                       <form action='admin-inventory.php' method='POST'>
+                                          <input type='hidden' name='delete_code' value='{$row['code']}'>
+                                          <button type='submit' class='app-content-headerButton-red' name='product_delete'>Delete</button>
+                                       </form>
+                                    </div>
+                                    ";
+                            }
+                        } 
+                    } else {
+                        echo "Error: " . mysqli_error($connection);
+                    }
+                  ?>
                </div>
             </div>
         </div>
         <dialog class="dialog dialog2">
-            <form action="index.html" method="dialog" class="myForm new-product-form">
+            <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" class="myForm new-product-form">
                <label>Product Name:</label>
                <input type="text" name="product_name">
                <label>Price:</label>
@@ -150,9 +250,13 @@
                <input type="file" accept="image/png, image/jpeg">
                <div class="actions">
                   <input type="button" value="Cancel" class="formButtons app-content-headerButton cancel">
-                  <input type="submit" value="Submit" name="product_submit" class="formButtons app-content-headerButton">
+                  <input type="submit" value="Submit" name="product_submit" class="formButtons app-content-headerButton submit">
                </div>
             </form>
+         </dialog>
+         <dialog class="edit-dialog dialog2">
+               <iframe src="../../views/edit/admin-inventory-edit.php" frameborder="0" class="edit-iFrame"></iframe>
+         </div>
          </dialog>
    </div>
    </div>
@@ -160,6 +264,9 @@
       let modeSwitch = document.querySelector('.mode-switch');
       const toggleButton = document.querySelector('.new-item');
       const dialog = document.querySelector('.dialog');
+      const editDialog = document.querySelector('.edit-dialog');
+      const editButton = document.querySelectorAll('.edit-button');
+      const iFrame = document.querySelector('.edit-iFrame');
       
       modeSwitch.addEventListener('click', function () {   
          document.documentElement.classList.toggle('light');
@@ -168,12 +275,27 @@
 
       toggleButton.addEventListener('click', () => {
          dialog.showModal();
-         console.log('hi');
       })
 
       document.querySelector('.cancel').onclick = () => {
          dialog.close();
       };
+
+      document.querySelector('.submit').addEventListener('click', () => {
+         addEditListener();
+      })
+
+      function addEditDialog() {
+        editButton.forEach(button => {
+            button.addEventListener('click', () => {
+                const {code} = button.dataset;
+                iFrame.src = `../../views/edit/admin-inventory-edit.php?code=${code}`;
+                editDialog.showModal();
+            })
+        })
+      }
+
+      addEditDialog();
    </script>
 </body>
 </html>
