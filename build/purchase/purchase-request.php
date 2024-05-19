@@ -15,39 +15,29 @@
       header("Location: ../../signin.php");
       exit;
    }
-   
+
    //Generate TitleCase Username for Display
    $username = titleCase($_SESSION['username']);
 
    //Handles Product Submission (Update Query)
-   if (isset($_POST['request_submit'])) {
-      $request_code = mysqli_real_escape_string($connection, $_POST['request_code']);
-      $request_status = 'pending';
+   if (isset($_POST['purchase_submit'])) {
+      $purchase_code = mysqli_real_escape_string($connection, $_POST['purchase_code']);
+      $purchase_supplier = mysqli_real_escape_string($connection, $_POST['purchase_supplier']);
+      $purchase_name = mysqli_real_escape_string($connection, $_POST['purchase_name']);
+      $purchase_quantity = mysqli_real_escape_string($connection, $_POST['purchase_quantity']);
+      $purchase_price = mysqli_real_escape_string($connection, $_POST['purchase_price']);
+      $purchase_status = 'request';
 
       //Handle data insertion
-      $query = "UPDATE request SET status = '$request_status' WHERE code = '$request_code'";
+      $query = "INSERT INTO request (code, supplier, name, quantity, price, status)  VALUES ('$purchase_code', '$purchase_supplier', '$purchase_name', '$purchase_quantity', '$purchase_price', '$purchase_status')";
+
       $result = mysqli_query($connection, $query);
 
-      print_r($result);
-
       if ($result) {
-         header('Location: admin-request.php');
+         header('Location: purchase-request.php');
          exit();
       } else {
          echo "Error: " . mysqli_error($connection);
-      }
-   }
-
-   //Delete/Deny Function 
-   if (isset($_POST['request_delete'])) {
-      $delete_code = mysqli_real_escape_string($connection, $_POST['delete_code']);
-      $query = "DELETE FROM request WHERE code = '{$delete_code}'";
-      $result = mysqli_query($connection, $query);
-      if ($result) {
-          header("Location: {$_SERVER['PHP_SELF']}");
-          exit();
-      } else {
-          echo "Error: " . mysqli_error($connection);
       }
    }
 
@@ -92,27 +82,21 @@
       </div>
       <ul class="sidebar-list">
          <li class="sidebar-list-item">
-         <a href="admin-purchase.php">
+         <a href="purchase-purchase.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             <span>Purchasing</span>
          </a>
          </li>
          <li class="sidebar-list-item active">
-         <a href="admin-request.php">
+         <a href="purchase-request.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
             <span>Request</span>
          </a>
          </li>
          <li class="sidebar-list-item">
-         <a href="admin-inventory.php">
+         <a href="purchase-inventory.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
             <span>Inventory</span>
-         </a>
-         </li>
-         <li class="sidebar-list-item">
-         <a href="admin-account.php">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span>User Accounts</span>
          </a>
          </li>
       </ul>
@@ -161,18 +145,18 @@
                <h1><?= '₱' . $totalItemPrice ?></h1>
                <p class="">All Items Total Price</p>
             </div>
-            <div class="request-list">
+            <div class="request-request-list">
                <h1>Pending Requests</h1>
                <button class="app-content-headerButton">Print Record</button>
-               <div class="request-table">
+               <button class="app-content-headerButton new-item" style="background-color:green">New Request</button>
+               <div class="purchase-request-table">
                   <div>Code</div>
                   <div>Supplier</div>
                   <div>Item Name</div>
                   <div>Quantity</div>
                   <div>Price</div>
                   <div>Status</div>
-                  <div>Deny</div>
-                  <div>Accept</div>
+                  <div>Created By</div>
                   <?php 
                      //Display Products 
                      $query = 'SELECT * FROM request';
@@ -189,19 +173,7 @@
                                  echo "<div>" . $row['quantity'] . "</div>";
                                  echo "<div>" . '₱' . $row['price'] . "</div>";
                                  echo "<div>" . $row['status'] . "</div>";
-                                 echo "<div>
-                                          <form action='admin-request.php' method='POST'>
-                                             <input type='hidden' name='delete_code' value='{$row['code']}'>
-                                             <button type='submit' class='app-content-headerButton-red' name='request_delete'>Deny</button>
-                                          </form>
-                                       </div>
-                                       ";
-                                 echo "<div>
-                                          <form action='{$_SERVER['PHP_SELF']}' method='POST' class='myForm new-product-form accept-form'> 
-                                             <input type='hidden' value='{$row['code']}' name='request_code'>
-                                             <input type='submit' class='app-content-headerButton-green edit-button accept-button'  value='Accept' name='request_submit'>
-                                          </form>
-                                       </div>";
+                                 echo "<div>" . 'Purchase Officer'. "</div>";
                               }
                               
                             }
@@ -212,10 +184,40 @@
                   ?>
                </div>
             </div>
-        </div>
+            <dialog class="dialog dialog2 account_dialog">
+            <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" class="myForm new-user-form" enctype="multipart/form-data"> 
+               <label>Item Code:</label>
+               <input type="text" name="purchase_code" class="inputs" value="<?= generateSecureUniqueCode(3) ?>" readonly>   
+               <label>Item Name:</label>
+               <input type="text" name="purchase_name" placeholder="Item Name" class="inputs" required>
+               <label>Supplier:</label>
+               <input type="text" name="purchase_supplier" placeholder="Supplier" class="inputs" required>
+               <label>Quantity:</label>
+               <input type="number" name="purchase_quantity" placeholder="Quantity" class="inputs" required>
+               <label>Price:</label>
+               <input type="number" name="purchase_price" placeholder="Price" class="inputs" required>
+               <input type="hidden" name="purchase_status" class="inputs" value="request">
+               <div class="actions">
+                  <input type="button" value="Cancel" class="formButtons app-content-headerButton cancel">
+                  <input type="submit" value="Submit" name="purchase_submit" class="formButtons app-content-headerButton submit">
+               </div>
+            </form>
+         </dialog>
+      </div>
    </div>
    </div>
-    <script src="../../app/toggle.js">
+   <script src="../../app/toggle.js"></script>
+   <script>
+      const toggleButton = document.querySelector('.new-item');
+      const dialog = document.querySelector('.dialog')
+
+      toggleButton.addEventListener('click', () => {
+         dialog.showModal();
+      })
+
+      document.querySelector('.cancel').onclick = () => {
+         dialog.close();
+      };
    </script>
 </body>
 </html>

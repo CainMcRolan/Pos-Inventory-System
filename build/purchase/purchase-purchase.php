@@ -3,74 +3,87 @@
    include('../../app/app.php');
    session_start();
    
-   //Check if user is logged in
    if (!isset($_SESSION['id'])) {
       header('Location: ../../signin.php');
       exit();
    }
 
-   //Hande Logout
-   if (isset($_POST['logout_session'])) {
-      session_destroy();
-      header("Location: ../../signin.php");
-      exit;
-   }
-   
-   //Generate TitleCase Username for Display
+   $result = mysqli_query($connection, "SELECT * FROM user WHERE id = {$_SESSION['id']}");
+   $loop = mysqli_fetch_assoc($result);
+
    $username = titleCase($_SESSION['username']);
 
-   //Handles Product Submission (Update Query)
    if (isset($_POST['request_submit'])) {
       $request_code = mysqli_real_escape_string($connection, $_POST['request_code']);
-      $request_status = 'pending';
+      $request_status = 'paid';
 
       //Handle data insertion
       $query = "UPDATE request SET status = '$request_status' WHERE code = '$request_code'";
       $result = mysqli_query($connection, $query);
 
-      print_r($result);
-
       if ($result) {
-         header('Location: admin-request.php');
-         exit();
-      } else {
-         echo "Error: " . mysqli_error($connection);
-      }
-   }
-
-   //Delete/Deny Function 
-   if (isset($_POST['request_delete'])) {
-      $delete_code = mysqli_real_escape_string($connection, $_POST['delete_code']);
-      $query = "DELETE FROM request WHERE code = '{$delete_code}'";
+      // Retrieve the row from the request table
+      $query = "SELECT code, name, price, quantity FROM request WHERE code = '$request_code'";
       $result = mysqli_query($connection, $query);
-      if ($result) {
-          header("Location: {$_SERVER['PHP_SELF']}");
-          exit();
+
+      if ($result && mysqli_num_rows($result) > 0) {
+         $row = mysqli_fetch_assoc($result);
+         $code = mysqli_real_escape_string($connection, $row['code']);
+         $name = mysqli_real_escape_string($connection, $row['name']);
+         $price = mysqli_real_escape_string($connection, $row['price']);
+         $quantity = mysqli_real_escape_string($connection, $row['quantity']);
+
+         $query = "INSERT INTO product (code, name, price, delivery, current_stock) VALUES ('$code', '$name', '$price', '$quantity', '$quantity')";
+         $result = mysqli_query($connection, $query);
+
+         if ($result) {
+               header('Location: admin-purchase.php');
+               exit();
+         } else {
+               echo "Error: " . mysqli_error($connection);
+         }
       } else {
-          echo "Error: " . mysqli_error($connection);
+         echo "Error: No matching request found.";
       }
+   } else {
+      echo "Error: " . mysqli_error($connection);
+   }
    }
 
    //Handles Total Variables
    $result = mysqli_query($connection, "select * from request where status = 'request'");
    $pendingRequest = 0;
-   $pendingQuantity = 0;
-   $totalSupplier = 0;
-   $totalItemPrice = 0;
-   $suppliers = [];
-
+ 
    if ($result) {
       $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
       foreach($categoryArray as $items) {
          $pendingRequest++;
-         $pendingQuantity += (int) $items['quantity'];
-         $totalItemPrice += (int) $items['price'] * (int) $items['quantity'];
-         $suppliers[] = $items['supplier'];
       }
-
-      $uniqueSupplier = array_unique($suppliers);
-      $totalSupplier = count($uniqueSupplier);
    }
+
+   $result = mysqli_query($connection, "select * from request where status = 'paid'");
+   $totalPaid = 0;
+
+   if ($result) {
+      $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
+      foreach($categoryArray as $items) {
+         $totalPaid++;
+      }
+   }
+
+   $result = mysqli_query($connection, "select * from request where status = 'pending'");
+   $totalPending = 0;
+   $accountPayable = 0;
+
+   if ($result) {
+      $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
+      foreach($categoryArray as $items) {
+         $totalPending++;
+         $accountPayable += (int) $items['price'] * (int) $items['quantity'];
+      }
+   }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,28 +104,22 @@
          <p class="logo"><?= 'Welcome ' . $username ?></p>
       </div>
       <ul class="sidebar-list">
-         <li class="sidebar-list-item">
-         <a href="admin-purchase.php">
+         <li class="sidebar-list-item active">
+         <a href="purchase-purchase.php ">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             <span>Purchasing</span>
          </a>
          </li>
-         <li class="sidebar-list-item active">
-         <a href="admin-request.php">
+         <li class="sidebar-list-item ">
+         <a href="purchase-request.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
             <span>Request</span>
          </a>
          </li>
          <li class="sidebar-list-item">
-         <a href="admin-inventory.php">
+         <a href="purchase-inventory.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
             <span>Inventory</span>
-         </a>
-         </li>
-         <li class="sidebar-list-item">
-         <a href="admin-account.php">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span>User Accounts</span>
          </a>
          </li>
       </ul>
@@ -121,21 +128,19 @@
          <img src="https://images.unsplash.com/photo-1527736947477-2790e28f3443?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTE2fHx3b21hbnxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=60" alt="Account">
          </div>
          <div class="account-info-name"><?= $username ?></div>
-
-         <!-- Handle Logout Query -->
-         <form method="POST" action="../../signin.php" class="account-info-more">
-            <button type="submit" class="account-info-more" name="logout_session">
-               <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-                     <path d="M17 16L21 12M21 12L17 8M21 12L7 12M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-               </svg>
-            </button>
-         </form>
-
+            <form method="POST" action="../../signin.php" class="account-info-more">
+               <button type="submit" class="account-info-more" name="logout_session">
+                  <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 16L21 12M21 12L17 8M21 12L7 12M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                  </svg>
+               </button>
+            </form>
+         </button>
       </div>
    </div>
    <div class="app-content">
          <div class="app-content-header">
-          <h1 class="app-content-headerText">Requests</h1>
+          <h1 class="app-content-headerText">Purchase</h1>
           <button class="mode-switch" title="Switch Theme">
             <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" height="24" viewBox="0 0 24 24">
               <defs></defs>
@@ -144,68 +149,68 @@
           </button>
           <button class="app-content-headerButton">Add Product</button>
         </div>
-        <div class="request-container">
+        <div class="purchase-container">
             <div class="requests waveeffect">
-               <h1><?= $pendingRequest; ?></h1>
-               <p class="">Pending Requests</p>
+               <h1><?= $pendingRequest ?></h1>
+               <p class="">Requests</p>
             </div>
             <div class="total-amount waveeffect">
-               <h1><?= $pendingQuantity ?></h1>
-               <p class="">Pending Quantity</p>
+               <h1><?= $totalPending ?></h1>
+               <p class="">Total Pending</p>
             </div>
             <div class="total-paid-amount waveeffect">
-               <h1><?= $totalSupplier ?></h1>
-               <p class="">Total Suppliers</p>
+               <h1><?= $totalPaid ?></h1>
+               <p class="">Total Paid</p>
             </div>
             <div class="total-purchase-due waveeffect">
-               <h1><?= '₱' . $totalItemPrice ?></h1>
-               <p class="">All Items Total Price</p>
+               <h1><?= '₱' . $accountPayable ?></h1>
+               <p class="">Total Account Payable</p>
             </div>
-            <div class="request-list">
-               <h1>Pending Requests</h1>
+            <div class="purchase-list">
+               <h1>Purchase List</h1>
                <button class="app-content-headerButton">Print Record</button>
-               <div class="request-table">
-                  <div>Code</div>
-                  <div>Supplier</div>
+               <div class="purchase-purchase-table">
+                  <div>Purchase Date</div>
+                  <div>Payment Status</div>
+                  <div>Purchase Code</div>
                   <div>Item Name</div>
                   <div>Quantity</div>
                   <div>Price</div>
-                  <div>Status</div>
-                  <div>Deny</div>
-                  <div>Accept</div>
+                  <div>Supplier Name</div>
+                  <div>Created By</div>
+                  <div>Account Payable</div>
                   <?php 
                      //Display Products 
-                     $query = 'SELECT * FROM request';
+                     $query = 'SELECT * FROM request ORDER BY status DESC';
 
                      $result = mysqli_query($connection, $query);
 
                      if ($result) {
                         if (mysqli_num_rows($result) > 0) {
-                            while ($row = mysqli_fetch_assoc($result)) {
-                              if ($row['status'] == 'request') {
+                           while ($row = mysqli_fetch_assoc($result)) {
+                              if ($row['status'] == 'pending' || $row['status'] == 'paid') {
+                                 echo "<div>" . $row['date'] . "</div>";
+                     
+                                 if ($row['status'] == 'pending') {
+                                    echo "<div style='color: red;'>" . $row['status'] . "</div>";
+                                    $buttonColor = 'red';
+                                    $status = 'Pay';
+                                 } else if ($row['status'] == 'paid') {
+                                    echo "<div style='color: green;'>" . $row['status'] . "</div>";
+                                    $buttonColor = 'green';
+                                    $status = 'Paid';
+                                 }
+                     
                                  echo "<div>" . $row['code'] . "</div>";
-                                 echo "<div>" . $row['supplier'] . "</div>";
                                  echo "<div>" . $row['name'] . "</div>";
                                  echo "<div>" . $row['quantity'] . "</div>";
                                  echo "<div>" . '₱' . $row['price'] . "</div>";
-                                 echo "<div>" . $row['status'] . "</div>";
-                                 echo "<div>
-                                          <form action='admin-request.php' method='POST'>
-                                             <input type='hidden' name='delete_code' value='{$row['code']}'>
-                                             <button type='submit' class='app-content-headerButton-red' name='request_delete'>Deny</button>
-                                          </form>
-                                       </div>
-                                       ";
-                                 echo "<div>
-                                          <form action='{$_SERVER['PHP_SELF']}' method='POST' class='myForm new-product-form accept-form'> 
-                                             <input type='hidden' value='{$row['code']}' name='request_code'>
-                                             <input type='submit' class='app-content-headerButton-green edit-button accept-button'  value='Accept' name='request_submit'>
-                                          </form>
-                                       </div>";
+                                 echo "<div>" . $row['supplier'] . "</div>";
+                                 echo "<div>" . 'Purchase Officer' . "</div>";
+                                 echo "<div>" . '₱' . (int)$row['price'] * (int)$row['quantity'] . "</div>";
+                                       }
+                                 }
                               }
-                              
-                            }
-                        } 
                      } else {
                            echo "Error: " . mysqli_error($connection);
                      }
@@ -213,8 +218,18 @@
                </div>
             </div>
         </div>
+        <dialog class="dialog dialog1" >
+         <form action="index.html" method="dialog" class="myForm">
+            
+         </form>
+      </dialog>
    </div>
    </div>
+   <script>
+      document.querySelector('.requests').addEventListener('click', () => {
+         window.location.href = 'purchase-request.php';
+      });
+   </script>
     <script src="../../app/toggle.js">
    </script>
 </body>

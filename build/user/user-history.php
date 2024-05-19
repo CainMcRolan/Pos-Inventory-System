@@ -87,24 +87,20 @@
    }
 
    //Handles Total Variables
-   $result = mysqli_query($connection, 'select * from product');
-   $totalItems = 0;
-   $totalStocks = 0;
-   $totalCategories = 0;
-   $totalItemPrice = 0;
-   $categories = [];
+   $result = mysqli_query($connection, 'select * from sale');
+   $totalSales = 0;
+   $salesToday = 0;
+   $totalQuantitySold = 0;
+   $receivedMoney = 0;
 
    if ($result) {
       $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
       foreach($categoryArray as $items) {
-         $totalItems++;
-         $totalStocks += (int) $items['current_stock'];
-         $totalItemPrice += (int) $items['price'] * (int) $items['current_stock'];
-         $categories[] = $items['category'];
+         $salesToday++;
+         $totalSales++;
+         $receivedMoney += (int) $items['cash_received'];
+         $totalQuantitySold += (int) $items['sold'];
       }
-
-      $uniqueCategories = array_unique($categories);
-      $totalCategories = count($uniqueCategories);
    }
 ?>
 <!DOCTYPE html>
@@ -127,27 +123,21 @@
       </div>
       <ul class="sidebar-list">
          <li class="sidebar-list-item">
-         <a href="admin-purchase.php">
+         <a href="user-pos.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <span>Purchasing</span>
-         </a>
-         </li>
-         <li class="sidebar-list-item">
-         <a href="admin-request.php">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-            <span>Request</span>
+            <span>Point of Sale</span>
          </a>
          </li>
          <li class="sidebar-list-item active">
-         <a href="admin-inventory.php">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-            <span>Inventory</span>
+         <a href="user-history.php">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+            <span>Sales History</span>
          </a>
          </li>
          <li class="sidebar-list-item">
-         <a href="admin-account.php">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span>User Accounts</span>
+         <a href="user-inventory.php">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+            <span>Inventory</span>
          </a>
          </li>
       </ul>
@@ -170,7 +160,7 @@
    </div>
    <div class="app-content">
          <div class="app-content-header">
-          <h1 class="app-content-headerText">Inventory</h1>
+          <h1 class="app-content-headerText">Sales History</h1>
           <button class="mode-switch" title="Switch Theme">
             <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="24" height="24" viewBox="0 0 24 24">
               <defs></defs>
@@ -181,71 +171,54 @@
         </div>
         <div class="inventory-container">
             <div class="requests waveeffect">
-               <h1><?= $totalItems; ?></h1>
-               <p class="">Total Items</p>
+               <h1><?= $totalSales; ?></h1>
+               <p class="">Total Sales</p>
             </div>
             <div class="total-amount waveeffect">
-               <h1><?= $totalStocks ?></h1>
-               <p class="">Total Stocks</p>
+               <h1><?= $salesToday ?></h1>
+               <p class="">Sales Today</p>
             </div>
             <div class="total-paid-amount waveeffect">
-               <h1><?= $totalCategories ?></h1>
-               <p class="">Categories</p>
+               <h1><?= $totalQuantitySold ?></h1>
+               <p class="">Total Quantity Sold</p>
             </div>
             <div class="total-purchase-due waveeffect">
-               <h1><?= '₱' . $totalItemPrice ?></h1>
-               <p class="">All Items Total Price</p>
+               <h1><?= '₱' . $receivedMoney ?></h1>
+               <p class="">Total Received Money</p>
             </div>
-            <div class="inventory-list">
-               <h1>Items List</h1>
+            <div class="purchase-list">
+               <h1>Sales List</h1>
                <button class="app-content-headerButton">Print Record</button>
-               <button class="app-content-headerButton new-item">New Item</button>
-               <div class="inventory-table">
+               <div class="user-history-table">
+                  <div>Sales Date</div>
                   <div>Code</div>
                   <div>Image</div>
                   <div>Item Name</div>
                   <div>Category</div>
                   <div>Price</div>
-                  <div>Current Stock</div>
-                  <div>Physical Count</div>
-                  <div>Delivery</div>
-                  <div>Transfer</div>
-                  <div>Wasteges</div>
-                  <div>Pull Out</div>
-                  <div>Returns</div>
-                  <div>Variance</div>  
-                  <div>Edit</div>
-                  <div>Delete</div>
+                  <div>Quantity Sold</div>
+                  <div>Method of Payment</div>
+                  <div>Cash Received</div>
+                  <div>Cashier Name</div>
                   <?php 
                      //Display Products 
-                     $query = 'SELECT * FROM product';
+                     $query = 'SELECT * FROM sale';
 
                      $result = mysqli_query($connection, $query);
 
                      if ($result) {
                         if (mysqli_num_rows($result) > 0) {
                             while ($row = mysqli_fetch_assoc($result)) {
+                              echo "<div>" . $row['date'] . "</div>";
                               echo "<div>" . $row['code'] . "</div>";
                               echo "<div><img src='../../assets/products/" . $row['image'] . "' alt='" . $row['name'] . "' width='50' height='50'></div>";
                               echo "<div>" . $row['name'] . "</div>";
                               echo "<div>" . $row['category'] . "</div>";
-                              echo "<div>" . '₱' . $row['price'] . "</div>";
-                              echo "<div>" . $row['current_stock'] . "</div>";
-                              echo "<div>" . $row['physical_count'] . "</div> ";
-                              echo "<div>" . $row['delivery'] . "</div>";
-                              echo "<div>" . $row['transfer'] . "</div>";
-                              echo "<div>" . $row['wasteges'] . "</div>";
-                              echo "<div>" . $row['pull_out'] . "</div>";
-                              echo "<div>" . $row['returns'] . "</div>";
-                              echo "<div>" . $row['variance'] . "</div>";
-                              echo "<div><button class='app-content-headerButton-green edit-button'' data-code='{$row['code']}'>Edit</button> </div>";
-                              echo "<div>
-                                       <form action='admin-inventory.php' method='POST'>
-                                          <input type='hidden' name='delete_code' value='{$row['code']}'>
-                                          <button type='submit' class='app-content-headerButton-red' name='product_delete'>Delete</button>
-                                       </form>
-                                    </div>
-                                    ";
+                              echo "<div>" . $row['price'] . "</div>";
+                              echo "<div>" . $row['sold'] . "</div>";
+                              echo "<div>" . $row['method'] . "</div>";
+                              echo "<div>" . $row['cash_received'] . "</div>";
+                              echo "<div>" . $row['cashier_name'] . "</div>";
                             }
                         } 
                      } else {
@@ -255,72 +228,9 @@
                </div>
             </div>
         </div>
-        <dialog class="dialog dialog2">
-            <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" class="myForm new-product-form" enctype="multipart/form-data"> 
-               <label>Product Name:</label>
-               <input type="text" name="product_name">
-               <label>Price:</label>
-               <input type="text" name="product_price">
-               <label>Category:</label>
-               <input type="text" name="product_category">
-               <label>Description:</label>
-               <input type="text" name="product_description">
-               <label>Physical Count:</label>
-               <input type="number" name="product_count"> 
-               <label>Delivery:</label>
-               <input type="number" name="product_delivery"> 
-               <label>Transfer:</label>
-               <input type="number" name="product_transfer"> 
-               <label>Wasteges:</label>
-               <input type="number" name="product_wasteges"> 
-               <label>Pull Out:</label>
-               <input type="number" name="product_pullout" > 
-               <label>Returns:</label>
-               <input type="number" name="product_return">
-               <label>Select Image:</label>
-               <input type="file" name="product_image" accept="image/png, image/jpeg" required>
-               <div class="actions">
-                  <input type="button" value="Cancel" class="formButtons app-content-headerButton cancel">
-                  <input type="submit" value="Submit" name="product_submit" class="formButtons app-content-headerButton submit">
-               </div>
-            </form>
-         </dialog>
-         <dialog class="edit-dialog dialog2">
-               <iframe src="../../views/edit/admin-inventory-edit.php" frameborder="0" class="edit-iFrame"></iframe>
-         </div>
-         </dialog>
    </div>
    </div>
    <script>
-      const toggleButton = document.querySelector('.new-item');
-      const dialog = document.querySelector('.dialog');
-      const editDialog = document.querySelector('.edit-dialog');
-      const editButton = document.querySelectorAll('.edit-button');
-      const iFrame = document.querySelector('.edit-iFrame');
-
-      toggleButton.addEventListener('click', () => {
-         dialog.showModal();
-      })
-
-      document.querySelector('.cancel').onclick = () => {
-         dialog.close();
-      };
-
-      document.querySelector('.submit').addEventListener('click', () => {
-         addEditListener();
-      })
-
-      function addEditDialog() {
-        editButton.forEach(button => {
-            button.addEventListener('click', () => {
-                const {code} = button.dataset;
-                iFrame.src = `../../views/edit/admin-inventory-edit.php?code=${code}`;
-                editDialog.showModal();
-            })
-        })
-      }
-
-      addEditDialog();
    </script>
    <script src="../../app/toggle.js"></script>
 </body>

@@ -127,27 +127,21 @@
       </div>
       <ul class="sidebar-list">
          <li class="sidebar-list-item">
-         <a href="admin-purchase.php">
+         <a href="user-pos.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <span>Purchasing</span>
+            <span>Point of Sale</span>
          </a>
          </li>
-         <li class="sidebar-list-item">
-         <a href="admin-request.php">
+         <li class="sidebar-list-item ">
+         <a href="user-history.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pie-chart"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-            <span>Request</span>
+            <span>Sales History</span>
          </a>
          </li>
          <li class="sidebar-list-item active">
-         <a href="admin-inventory.php">
+         <a href="user-inventory.php">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-inbox"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
             <span>Inventory</span>
-         </a>
-         </li>
-         <li class="sidebar-list-item">
-         <a href="admin-account.php">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span>User Accounts</span>
          </a>
          </li>
       </ul>
@@ -196,11 +190,10 @@
                <h1><?= '₱' . $totalItemPrice ?></h1>
                <p class="">All Items Total Price</p>
             </div>
-            <div class="inventory-list">
+            <div class="purchase-list">
                <h1>Items List</h1>
                <button class="app-content-headerButton">Print Record</button>
-               <button class="app-content-headerButton new-item">New Item</button>
-               <div class="inventory-table">
+               <div class="purchase-inventory-table">
                   <div>Code</div>
                   <div>Image</div>
                   <div>Item Name</div>
@@ -214,8 +207,6 @@
                   <div>Pull Out</div>
                   <div>Returns</div>
                   <div>Variance</div>  
-                  <div>Edit</div>
-                  <div>Delete</div>
                   <?php 
                      //Display Products 
                      $query = 'SELECT * FROM product';
@@ -238,14 +229,6 @@
                               echo "<div>" . $row['pull_out'] . "</div>";
                               echo "<div>" . $row['returns'] . "</div>";
                               echo "<div>" . $row['variance'] . "</div>";
-                              echo "<div><button class='app-content-headerButton-green edit-button'' data-code='{$row['code']}'>Edit</button> </div>";
-                              echo "<div>
-                                       <form action='admin-inventory.php' method='POST'>
-                                          <input type='hidden' name='delete_code' value='{$row['code']}'>
-                                          <button type='submit' class='app-content-headerButton-red' name='product_delete'>Delete</button>
-                                       </form>
-                                    </div>
-                                    ";
                             }
                         } 
                      } else {
@@ -255,72 +238,9 @@
                </div>
             </div>
         </div>
-        <dialog class="dialog dialog2">
-            <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" class="myForm new-product-form" enctype="multipart/form-data"> 
-               <label>Product Name:</label>
-               <input type="text" name="product_name">
-               <label>Price:</label>
-               <input type="text" name="product_price">
-               <label>Category:</label>
-               <input type="text" name="product_category">
-               <label>Description:</label>
-               <input type="text" name="product_description">
-               <label>Physical Count:</label>
-               <input type="number" name="product_count"> 
-               <label>Delivery:</label>
-               <input type="number" name="product_delivery"> 
-               <label>Transfer:</label>
-               <input type="number" name="product_transfer"> 
-               <label>Wasteges:</label>
-               <input type="number" name="product_wasteges"> 
-               <label>Pull Out:</label>
-               <input type="number" name="product_pullout" > 
-               <label>Returns:</label>
-               <input type="number" name="product_return">
-               <label>Select Image:</label>
-               <input type="file" name="product_image" accept="image/png, image/jpeg" required>
-               <div class="actions">
-                  <input type="button" value="Cancel" class="formButtons app-content-headerButton cancel">
-                  <input type="submit" value="Submit" name="product_submit" class="formButtons app-content-headerButton submit">
-               </div>
-            </form>
-         </dialog>
-         <dialog class="edit-dialog dialog2">
-               <iframe src="../../views/edit/admin-inventory-edit.php" frameborder="0" class="edit-iFrame"></iframe>
-         </div>
-         </dialog>
    </div>
    </div>
    <script>
-      const toggleButton = document.querySelector('.new-item');
-      const dialog = document.querySelector('.dialog');
-      const editDialog = document.querySelector('.edit-dialog');
-      const editButton = document.querySelectorAll('.edit-button');
-      const iFrame = document.querySelector('.edit-iFrame');
-
-      toggleButton.addEventListener('click', () => {
-         dialog.showModal();
-      })
-
-      document.querySelector('.cancel').onclick = () => {
-         dialog.close();
-      };
-
-      document.querySelector('.submit').addEventListener('click', () => {
-         addEditListener();
-      })
-
-      function addEditDialog() {
-        editButton.forEach(button => {
-            button.addEventListener('click', () => {
-                const {code} = button.dataset;
-                iFrame.src = `../../views/edit/admin-inventory-edit.php?code=${code}`;
-                editDialog.showModal();
-            })
-        })
-      }
-
-      addEditDialog();
    </script>
    <script src="../../app/toggle.js"></script>
 </body>

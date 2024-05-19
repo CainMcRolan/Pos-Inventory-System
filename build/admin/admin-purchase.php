@@ -16,39 +16,63 @@
    if (isset($_POST['request_submit'])) {
       $request_code = mysqli_real_escape_string($connection, $_POST['request_code']);
       $request_status = 'paid';
-
+  
       //Handle data insertion
       $query = "UPDATE request SET status = '$request_status' WHERE code = '$request_code'";
       $result = mysqli_query($connection, $query);
-
+  
       if ($result) {
-      // Retrieve the row from the request table
-      $query = "SELECT code, name, price, quantity FROM request WHERE code = '$request_code'";
-      $result = mysqli_query($connection, $query);
+          // Retrieve the row from the request table
+          $query = "SELECT code, name, price, quantity FROM request WHERE code = '$request_code'";
+          $result = mysqli_query($connection, $query);
+  
+          if ($result && mysqli_num_rows($result) > 0) {
+              $row = mysqli_fetch_assoc($result);
+              $code = mysqli_real_escape_string($connection, $row['code']);
+              $name = mysqli_real_escape_string($connection, $row['name']);
+              $price = mysqli_real_escape_string($connection, $row['price']);
+              $quantity = mysqli_real_escape_string($connection, $row['quantity']);
+  
+              // Check if the product name already exists in the product table
+              $check_query = "SELECT * FROM product WHERE name = '$name'";
+              $check_result = mysqli_query($connection, $check_query);
+  
+              if ($check_result && mysqli_num_rows($check_result) > 0) {
+                  // Product already exists, update the quantity and delivery
+                  $existing_row = mysqli_fetch_assoc($check_result);
+                  $new_quantity = $existing_row['current_stock'] + $quantity;
+                  $new_delivery = $existing_row['delivery'] + $quantity;
+                  $variance = $new_quantity - $existing_row['physical_count'];
 
-      if ($result && mysqli_num_rows($result) > 0) {
-         $row = mysqli_fetch_assoc($result);
-         $code = mysqli_real_escape_string($connection, $row['code']);
-         $name = mysqli_real_escape_string($connection, $row['name']);
-         $price = mysqli_real_escape_string($connection, $row['price']);
-         $quantity = mysqli_real_escape_string($connection, $row['quantity']);
+                  $update_query = "UPDATE product SET current_stock = '$new_quantity', delivery = '$new_delivery', variance = '$variance' WHERE name = '$name'";
+                  $update_result = mysqli_query($connection, $update_query);
 
-         $query = "INSERT INTO product (code, name, price, delivery, current_stock) VALUES ('$code', '$name', '$price', '$quantity', '$quantity')";
-         $result = mysqli_query($connection, $query);
-
-         if ($result) {
-               header('Location: admin-purchase.php');
-               exit();
-         } else {
-               echo "Error: " . mysqli_error($connection);
-         }
+                  if ($update_result) {
+                     header('Location: admin-purchase.php');
+                     exit();
+                  } else {
+                     echo "Error: " . mysqli_error($connection);
+                  }
+              } else {
+                  // Product doesn't exist, insert a new row
+                  $query = "INSERT INTO product (code, name, price, delivery, current_stock) VALUES ('$code', '$name', '$price', '$quantity', '$quantity')";
+                  $result = mysqli_query($connection, $query);
+  
+                  if ($result) {
+                      header('Location: admin-purchase.php');
+                      exit();
+                  } else {
+                      echo "Error: " . mysqli_error($connection);
+                  }
+              }
+          } else {
+              echo "Error: No matching request found.";
+          }
       } else {
-         echo "Error: No matching request found.";
+          echo "Error: " . mysqli_error($connection);
       }
-   } else {
-      echo "Error: " . mysqli_error($connection);
-   }
-   }
+  }
+
 
    //Handles Total Variables
    $result = mysqli_query($connection, "select * from request where status = 'request'");
@@ -104,12 +128,6 @@
          <p class="logo"><?= 'Welcome ' . $username ?></p>
       </div>
       <ul class="sidebar-list">
-         <li class="sidebar-list-item ">
-         <a href="admin-home.php">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span>Home</span>
-         </a>
-         </li>
          <li class="sidebar-list-item active">
          <a href="#">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -140,8 +158,13 @@
          <img src="https://images.unsplash.com/photo-1527736947477-2790e28f3443?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTE2fHx3b21hbnxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=60" alt="Account">
          </div>
          <div class="account-info-name"><?= $username ?></div>
-         <button class="account-info-more">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-more-horizontal"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            <form method="POST" action="../../signin.php" class="account-info-more">
+               <button type="submit" class="account-info-more" name="logout_session">
+                  <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 16L21 12M21 12L17 8M21 12L7 12M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                  </svg>
+               </button>
+            </form>
          </button>
       </div>
    </div>
@@ -189,33 +212,42 @@
                   <div>Action</div>
                   <?php 
                      //Display Products 
-                     $query = 'SELECT * FROM request';
+                     $query = 'SELECT * FROM request ORDER BY status DESC';
 
                      $result = mysqli_query($connection, $query);
 
                      if ($result) {
                         if (mysqli_num_rows($result) > 0) {
-                            while ($row = mysqli_fetch_assoc($result)) {
-                              if ($row['status'] == 'pending' || $row['status'] == 'paid' ) {
+                           while ($row = mysqli_fetch_assoc($result)) {
+                              if ($row['status'] == 'pending' || $row['status'] == 'paid') {
                                  echo "<div>" . $row['date'] . "</div>";
-                                 echo "<div>" . $row['status'] . "</div>";
+                     
+                                 if ($row['status'] == 'pending') {
+                                    echo "<div style='color: red;'>" . $row['status'] . "</div>";
+                                    $buttonColor = 'red';
+                                    $status = 'Pay';
+                                 } else if ($row['status'] == 'paid') {
+                                    echo "<div style='color: green;'>" . $row['status'] . "</div>";
+                                    $buttonColor = 'green';
+                                    $status = 'Paid';
+                                 }
+                     
                                  echo "<div>" . $row['code'] . "</div>";
                                  echo "<div>" . $row['name'] . "</div>";
                                  echo "<div>" . $row['quantity'] . "</div>";
                                  echo "<div>" . '₱' . $row['price'] . "</div>";
                                  echo "<div>" . $row['supplier'] . "</div>";
                                  echo "<div>" . 'Purchase Officer' . "</div>";
-                                 echo "<div>" . '₱' . (int) $row['price'] * (int) $row['quantity'] . "</div>";
+                                 echo "<div>" . '₱' . (int)$row['price'] * (int)$row['quantity'] . "</div>";
                                  echo "<div>
-                                          <form action='{$_SERVER['PHP_SELF']}' method='POST' class='myForm new-product-form accept-form'> 
+                                          <form action='{$_SERVER['PHP_SELF']}' method='POST' class='myForm new-product-form accept-form'>
                                              <input type='hidden' value='{$row['code']}' name='request_code'>
-                                             <input type='submit' class='app-content-headerButton-red edit-button accept-button'  value='Pay' name='request_submit'>
+                                             <input type='submit' class='app-content-headerButton-red edit-button accept-button' style='color: white; background-color: $buttonColor;' value='$status' name='request_submit'>
                                           </form>
-                                       </div>";
+                                    </div>";
+                                       }
+                                 }
                               }
-                              
-                            }
-                        } 
                      } else {
                            echo "Error: " . mysqli_error($connection);
                      }
@@ -231,15 +263,11 @@
    </div>
    </div>
    <script>
-      let modeSwitch = document.querySelector('.mode-switch');
-         modeSwitch.addEventListener('click', function () {   
-         document.documentElement.classList.toggle('light');
-         modeSwitch.classList.toggle('active');
-      });
-
       document.querySelector('.requests').addEventListener('click', () => {
          window.location.href = 'admin-request.php';
       });
+   </script>
+    <script src="../../app/toggle.js">
    </script>
 </body>
 </html>

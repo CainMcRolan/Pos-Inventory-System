@@ -23,10 +23,10 @@
                header('Location: ./build/admin/admin-purchase.php');
                exit();
             } else if ($row['is_admin'] == 'user') {
-               header('Location: ./build/user/home-user.php');
+               header('Location: ./build/user/user-inventory.php');
                exit();
             } else if ($row['is_admin'] == 'purchase') {
-               header('Location: ./build/purchase/home-purchase.php');
+               header('Location: ./build/purchase/purchase-inventory.php');
                exit();
             }
          } else {

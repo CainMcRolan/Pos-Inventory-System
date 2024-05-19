@@ -464,6 +464,7 @@
 	padding: 10px;
 	grid-template: 1fr 9fr / 9fr 1fr;
 	gap: 0px 10px; 
+	grid-auto-rows: 1rem;
 }
 
 .purchase-table {
@@ -532,6 +533,7 @@
 	padding: 10px;
 	grid-template: 1fr 9fr / 8fr 1fr 1fr;
 	gap: 0px 10px; 
+	grid-auto-rows: 1rem;
 }
 
 .inventory-table {
@@ -639,7 +641,6 @@
 /* Solely for Inventory */
 
 /* Solely for Admin Requests */
-
 .request-container{
 	margin-top: 20px;
 	color: var(--app-content-main-color);
@@ -672,6 +673,7 @@
 	padding: 10px;
 	grid-template: 1fr 9fr / 9fr 1fr;
 	gap: 0px 10px; 
+	grid-auto-rows: 1rem;
 }
 
 .request-table {
@@ -707,6 +709,454 @@
 }
 
 /* Solely for Admin Requests */
+
+/* Solely for Admin Accounts */
+.account-container{
+	margin-top: 20px;
+	color: var(--app-content-main-color);
+	display: grid;
+	grid-template: 1fr 5fr / repeat(4, 1fr);
+	height: 90vh;
+	gap: 20px;
+}
+
+.account-container > div > h1 {
+	font-weight: bold;
+}
+
+.account-container > div > p {
+	font-size: 0.9rem;
+}
+
+.account-list {
+	background-color: var(--app-content-secondary-color);
+	grid-column: 1 / 5;
+	display: grid;
+	padding: 10px;
+	grid-template: 1fr 13fr / 8fr 1fr 1fr;
+	grid-auto-rows: 1rem;
+	gap: 0px 10px; 
+	height: 90vh;
+}
+
+.account-table {
+	grid-column: span 3;
+	display: grid;
+	grid-template-columns: 0.3fr repeat(2, 1fr) 1.3fr repeat(2, 1fr) 1.3fr repeat(2, 1fr);
+	grid-template-rows: 3rem;
+	grid-auto-rows: 3rem;
+	gap: 3px;
+	overflow: auto;
+	
+}
+
+.account-table > div {
+	justify-content: center;
+	padding: 5px;
+	align-items: center;
+	display: flex;
+	background-color: var(--action-color);
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: white;
+	text-align: center;
+}
+
+.account-table > div:nth-child(n+10) {
+	background-color: var(--app-content-secondary-color);
+	color: var(--app-content-main-color);
+	font-size: 0.9rem;
+}
+
+.accept-form, .accept-button {
+	width: 5rem;
+}
+
+.account_dialog {
+	width: 30%;
+   height: 50%;
+}
+
+.new-user-form {
+	width: 100%;
+	height: 100%;
+	display: grid;
+	grid-template-columns: 20% 75%;
+}
+
+.new-user-form > label {
+	color: var(--app-content-main-color);
+	font-weight: bold;
+	margin: 10px;
+	display: flex;
+	align-items:flex-end;
+	font-size: 0.8rem;
+}
+
+.new-user-form > input[type=text], .new-user-form > input[type=number], .new-user-form > input[type=email], .new-user-form > input[type=password], .new-user-form > select {
+	color: var(--app-content-main-color);
+	font-weight: bold;
+	font-size: 1rem;
+	margin: 10px;
+	border: none;
+	background-color: var(--app-bg);
+	border-bottom: 1px inset var(--app-content-main-color);
+	width: 100%;
+	
+}
+
+.new-user-form > input:focus {
+	outline: none;
+}
+
+.new-user-form > input[type=file] {
+	margin: 10px;
+	color: var(--app-content-main-color);
+} 
+
+.actions {
+	grid-column: span 2;
+	margin: 20px 10px;
+	display: flex;
+	justify-content: end;
+	align-items: start;
+}
+
+.formButtons {
+	margin-left: 10px;
+	font-weight: bold;
+}
+
+.edit-iFrame {
+	width: 100%;
+	height: 100%;
+}
+
+.edit-account-form {
+	height: 100%;
+}
+
+.dialog3 {
+	width: 30%;
+   height: 50%;
+}
+
+/* Solely for Admin Accounts */
+
+/* Solely for Purchase Inventory */
+.purchase-list {
+	background-color: var(--app-content-secondary-color);
+	grid-column: 1 / 5;
+	display: grid;
+	padding: 10px;
+	grid-template: 1fr 9fr / 9fr 1fr;
+	gap: 0px 10px; 
+	grid-auto-rows: 1rem;
+}
+
+.purchase-inventory-table {
+	grid-column: span 3;
+	display: grid;
+	grid-template-columns: 0.5fr repeat(4, 1fr)  repeat(8, 0.7fr);
+	grid-template-rows: 3rem;
+	grid-auto-rows: 3rem;
+	gap: 3px;
+	overflow: auto;
+}
+
+.purchase-inventory-table > div {
+	justify-content: center;
+	padding: 5px;
+	align-items: center;
+	display: flex;
+	background-color: var(--action-color);
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: white;
+	text-align: center;
+}
+
+.purchase-inventory-table > div:nth-child(n+14) {
+	background-color: var(--app-content-secondary-color);
+	color: var(--app-content-main-color);
+	font-size: 0.9rem;
+}
+
+/* Solely for Purchase Inventory */
+
+/* Solely for Purchase REquest */
+.purchase-request-table {
+	grid-column: span 3;
+	display: grid;
+	grid-template-columns: 0.5fr repeat(5, 1fr) 1fr;
+	grid-template-rows: 3rem;
+	grid-auto-rows: 3rem;
+	gap: 3px;
+	overflow: auto;
+}
+
+.purchase-request-table > div {
+	justify-content: center;
+	padding: 5px;
+	align-items: center;
+	display: flex;
+	background-color: var(--action-color);
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: white;
+	text-align: center;
+}
+
+.purchase-request-table > div:nth-child(n+8) {
+	background-color: var(--app-content-secondary-color);
+	color: var(--app-content-main-color);
+	font-size: 0.9rem;
+}
+
+.request-request-list {
+	background-color: var(--app-content-secondary-color);
+	grid-column: 1 / 5;
+	display: grid;
+	padding: 10px;
+	grid-template: 1fr 9fr / 9fr 1fr 1fr;
+	gap: 0px 10px; 
+	grid-auto-rows: 1rem;
+}
+
+/* Solely for Purchase REquest */
+
+
+/* Solely for Purchase Purchase */
+.purchase-purchase-table {
+	grid-column: span 3;
+	display: grid;
+	grid-template-columns: repeat(9, 1fr);
+	grid-template-rows: 3rem;
+	grid-auto-rows: 2rem;
+	gap: 3px;
+	overflow: auto;
+	
+}
+
+.purchase-purchase-table > div {
+	justify-content: start;
+	padding: 5px;
+	align-items: center;
+	display: flex;
+	background-color: var(--action-color);
+	color: white;
+	font-size: 0.9rem;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+}
+
+.purchase-purchase-table > div:nth-child(n+10) {
+	background-color: var(--app-content-secondary-color);
+	color: var(--app-content-main-color);
+	font-size: 0.9rem;
+}
+
+
+/* Solely for Purchase Purchase */
+
+
+/* Solely for User History */
+.user-history-table {
+	grid-column: span 3;
+	display: grid;
+	grid-template-columns: 1fr 0.5fr repeat(8, 1fr);
+	grid-template-rows: 3rem;
+	grid-auto-rows: 3rem;
+	gap: 3px;
+	overflow: auto;
+}
+
+.user-history-table > div {
+	justify-content: center;
+	padding: 5px;
+	align-items: center;
+	display: flex;
+	background-color: var(--action-color);
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: white;
+	text-align: center;
+}
+
+.user-history-table > div:nth-child(n+11) {
+	background-color: var(--app-content-secondary-color);
+	color: var(--app-content-main-color);
+	font-size: 0.9rem;
+}
+
+
+/* Solely for User History */
+/* Solely for Point of Sales */
+.history-button {
+	color: white;
+	text-decoration: none;
+	font-weight: bold;
+}
+.pos-container {
+	background-color: var(--app-bg);
+	width: 100%;
+	height: 90vh;
+	margin-top: 10px;
+	display: grid;
+	grid-template-columns: 58% 40%;
+	gap: 2%;
+}
+
+.pos-container-1 {
+	background-color: var(--app-content-secondary-color);
+	display: grid;
+	grid-template-rows: 85% 15%;
+	width: 100%;
+}
+
+
+
+.product-display {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	border: 1px solid var(--action-color-hover);
+}
+
+.table-div{
+	width: 95%;
+	display: grid;
+	grid-template-columns: 1fr 0.3fr 1fr 0.7fr 0.3fr 0.1fr;
+	grid-template-rows: 2rem;
+	grid-auto-rows: 2rem;
+	margin-top: 20px;
+}
+
+.table-div > div {
+	background-color: var(--action-color);
+	display: flex;
+	padding: 2px;
+	align-items: center;
+	color: var(--app-bg);
+	font-size: 0.8rem;
+	font-weight: bold;
+	border-left: 1px solid var(--app-bg);
+}
+
+.table-div > div:nth-child(n+7) {
+	background-color: var(--app-bg);
+	color: var(--app-content-main-color);
+	border-left: 1px solid var(--action-color);
+
+}
+
+.functions-div {
+	background-color: #8eb4ff;
+	display: grid;
+	grid-template: 1fr 1fr / repeat(4, 1fr);
+
+}
+
+.functions-div > div:nth-child(n+2) {
+	margin: 5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.functions-div > div > p {
+	font-weight: bold;
+	color: black;
+	font-family:Arial, Helvetica, sans-serif;
+}
+
+.check-terminal-report , .check-report, .check-hourly-report, .pay-div {
+	cursor: pointer;
+	box-shadow: 0px 1px 5px #333;
+}
+
+
+.check-report {
+	background-color: red;
+	width: 90%;
+	height: 80%;
+}
+
+.check-hourly-report {
+	background-color: skyblue;
+	width: 90%;
+	height: 80%;
+}
+
+.check-terminal-report {
+	background-color: green;
+	width: 90%;
+	height: 80%;
+}
+
+.pay-div {
+	background-color: blue;
+	width: 90%;
+	height: 80%;
+}
+
+.pos-container-2 {
+	background-color: var(--app-content-secondary-color);
+	height: 80%;
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	grid-template-rows: 3rem 10rem;
+	grid-auto-rows: 10rem;
+	gap: 10px;
+	overflow: auto;
+}
+
+.pos-container-2 > div {
+	width: 100%;
+	height: 100%;
+}
+
+.hi {
+	grid-column: 1 / 5;
+	margin: 5px auto;
+	width: 98%;
+	padding: 5px;
+}
+
+.item-div {
+	background-color: var(--action-color-hover);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.item-div > img {
+	width: 60%;
+	height: 60%;
+}
+
+.item-div > h6 {
+	background-color: red;
+	border: 1px solid black;
+	font-weight: bold;
+	padding: 2px;
+}
+
+.invisible {
+	display: none;
+}
+
+.quantity-select {
+	width: 100%;
+	height: 100%;
+	border: none;
+
+}
+
+/* Solely for Point of Sales */
 
  .tableView .products-header {
 	 display: flex;
