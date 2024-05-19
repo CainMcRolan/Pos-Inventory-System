@@ -73,7 +73,7 @@
                       $insertSaleQuery = "INSERT INTO sale (code, image, name, category, price, sold, cash_received, method, cashier_name) VALUES ('$code', '$image', '$name', '$category', $price, $quantity, $subtotal, 'cash', '$cashier')";
                       mysqli_query($connection, $insertSaleQuery);
 
-                      $insertCashQuery = "INSERT INTO cash (cash) VALUES ($subtotal)";
+                      $insertCashQuery = "INSERT INTO cash (cash, name) VALUES ('$subtotal', '$cashier')";
                       mysqli_query($connection, $insertCashQuery);
                   } else {
                       throw new Exception("Insufficient stock for product code: $code");
