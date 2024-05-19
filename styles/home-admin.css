@@ -508,6 +508,7 @@
 	grid-template: 1fr 5fr / repeat(4, 1fr);
 	height: 90vh;
 	gap: 20px;
+	overflow: auto;
 }
 
 .requests, .total-amount, .total-paid-amount, .total-purchase-due {
@@ -645,7 +646,7 @@
 	margin-top: 20px;
 	color: var(--app-content-main-color);
 	display: grid;
-	grid-template: 1fr 5fr / repeat(4, 1fr);
+	grid-template: 1fr 5fr / repeat(5, 1fr);
 	height: 90vh;
 	gap: 20px;
 }
@@ -668,7 +669,7 @@
 
 .request-list {
 	background-color: var(--app-content-secondary-color);
-	grid-column: 1 / 5;
+	grid-column: 1 / 6;
 	display: grid;
 	padding: 10px;
 	grid-template: 1fr 9fr / 9fr 1fr;
@@ -923,6 +924,31 @@
 	grid-auto-rows: 1rem;
 }
 
+.request-container-2{
+	margin-top: 20px;
+	color: var(--app-content-main-color);
+	display: grid;
+	grid-template: 1fr 5fr / repeat(4, 1fr);
+	height: 90vh;
+	gap: 20px;
+}
+
+.requests, .total-amount, .total-paid-amount, .total-purchase-due {
+	background-color: var(--app-content-secondary-color);
+	display: grid;
+	align-items: center;
+	padding: 30px;
+	justify-content: start;
+}
+
+.request-container-2 > div > h1 {
+	font-weight: bold;
+}
+
+.request-container-2 > div > p {
+	font-size: 0.9rem;
+}
+
 /* Solely for Purchase REquest */
 
 
@@ -963,7 +989,7 @@
 
 /* Solely for User History */
 .user-history-table {
-	grid-column: span 3;
+	grid-column: span 5;
 	display: grid;
 	grid-template-columns: 1fr 0.5fr repeat(8, 1fr);
 	grid-template-rows: 3rem;
@@ -990,6 +1016,37 @@
 	font-size: 0.9rem;
 }
 
+.purchase-list-user {
+	background-color: var(--app-content-secondary-color);
+	grid-column: 1 / 5;
+	display: grid;
+	padding: 10px;
+	grid-template: 1fr 9fr / 8fr 1fr 1fr 1fr;
+	gap: 0px 10px; 
+	overflow: auto;
+	grid-auto-rows: 1rem;
+}
+
+.user-history-form {
+	grid-column: span 2;
+	display: grid;
+	grid-template-columns: 68% 30%;
+	gap: 0% 2%;
+}
+
+.user-history-form > input[type=number] {
+	height: 2rem;
+	padding: 5px;
+}
+
+.user-history-form > input[type=submit] {
+	height: 2rem;
+	padding: 5px;
+	color: white;
+	background-color: var(--action-color);
+	border: none;
+	border-radius: 5px;
+}
 
 /* Solely for User History */
 /* Solely for Point of Sales */
@@ -1014,8 +1071,6 @@
 	grid-template-rows: 85% 15%;
 	width: 100%;
 }
-
-
 
 .product-display {
 	width: 100%;
@@ -1058,14 +1113,14 @@
 
 }
 
-.functions-div > div:nth-child(n+2) {
+.functions-div > div, .functions-div > form {
 	margin: 5px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
-.functions-div > div > p {
+.functions-div > div > p, .functions-div > form > button > p {
 	font-weight: bold;
 	color: black;
 	font-family:Arial, Helvetica, sans-serif;
@@ -1075,7 +1130,6 @@
 	cursor: pointer;
 	box-shadow: 0px 1px 5px #333;
 }
-
 
 .check-report {
 	background-color: red;
@@ -1089,11 +1143,29 @@
 	height: 80%;
 }
 
+.functions-div > form {
+	border: none;
+	box-shadow: none;
+	height: 80%;
+	width: 90%	;
+}
+
 .check-terminal-report {
 	background-color: green;
-	width: 90%;
-	height: 80%;
+	width: 100%;
+	height: 100%;
+	border: 1px solid green;
+	box-shadow: 0px 1px 3px #333;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
+
+.icon > * {
+	font-weight: bold;
+}
+
+
 
 .pay-div {
 	background-color: blue;
@@ -1157,6 +1229,89 @@
 }
 
 /* Solely for Point of Sales */
+
+/* Solely for Admin Report */
+.report-container{
+	margin-top: 20px;
+	color: var(--app-content-main-color);
+	display: grid;
+	grid-template: 1fr 5fr / repeat(5, 1fr);
+	height: 90vh;
+	gap: 20px;
+}
+
+.requests, .total-amount, .total-paid-amount, .total-purchase-due {
+	background-color: var(--app-content-secondary-color);
+	display: grid;
+	align-items: center;
+	padding: 30px;
+	justify-content: start;
+}
+
+.report-container > div > h1 {
+	font-weight: bold;
+}
+
+.report-container > div > p {
+	font-size: 0.9rem;
+}
+
+.report-list-2 {
+	background-color: var(--app-content-secondary-color);
+	grid-column: 1 / 6;
+	display: grid;
+	padding: 10px;
+	grid-template: 1fr 9fr / 9fr 2fr;
+	gap: 0px 10px; 
+	grid-auto-rows: 1rem;
+}
+
+.sort-form {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 10px;
+}
+
+.report-table {
+	grid-column: span 3;
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 1fr;
+	grid-auto-rows: 3rem;
+	gap: 3px;
+	overflow: auto;
+}
+
+.report-table > iframe {
+	width: 100%;
+	height: 100%;
+}
+
+
+
+.report-table > div {
+	justify-content: center;
+	padding: 5px;
+	align-items: center;
+	display: flex;
+	background-color: var(--action-color);
+	font-size: 0.9rem;
+	font-weight: bold;
+	color: white;
+	text-align: center;
+}
+
+.report-table > div:nth-child(n+9) {
+	background-color: var(--app-content-secondary-color);
+	color: var(--app-content-main-color);
+	font-size: 0.9rem;
+}
+
+.accept-form, .accept-button {
+	width: 5rem;
+}
+
+/* Solely for Admin Report */
 
  .tableView .products-header {
 	 display: flex;

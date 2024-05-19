@@ -19,10 +19,30 @@
    //Generate TitleCase Username for Display
    $username = titleCase($_SESSION['username']);
 
+   $query = "SELECT cash FROM cash";
+   $result = mysqli_query($connection, $query);
+
+   $totalCash = 0;
+   while ($row = mysqli_fetch_assoc($result)) {
+      $totalCash += $row['cash'];
+   }
+
+   // Insert total cash amount into cash_pull_out
+ 
+   if (isset($_POST['terminal-report-submit'])) {
+      $negativeCash = -$totalCash;
+      $queryInsertPullOut = "INSERT INTO cash (cash_pull_out, cash, name) VALUES ('$totalCash', '$negativeCash', '{$_SESSION['username']}')";
+      $resultInsertPullOut = mysqli_query($connection, $queryInsertPullOut);
+   }
+
    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $products = json_decode($_POST['products'], true);
-  
-      mysqli_begin_transaction($connection);
+      try {
+         $products = json_decode($_POST['products'], true, 512, JSON_THROW_ON_ERROR);
+      } catch (JsonException $e) {
+         header('Location: user-pos.php');
+         exit(); // Exit if decoding fails
+      }
+      mysqli_begin_transaction($connection); 
   
       try {
           foreach ($products as $product) {
@@ -52,6 +72,9 @@
                       // Insert the sale record into the sale table
                       $insertSaleQuery = "INSERT INTO sale (code, image, name, category, price, sold, cash_received, method, cashier_name) VALUES ('$code', '$image', '$name', '$category', $price, $quantity, $subtotal, 'cash', '$cashier')";
                       mysqli_query($connection, $insertSaleQuery);
+
+                      $insertCashQuery = "INSERT INTO cash (cash) VALUES ($subtotal)";
+                      mysqli_query($connection, $insertCashQuery);
                   } else {
                       throw new Exception("Insufficient stock for product code: $code");
                   }
@@ -66,6 +89,9 @@
           mysqli_rollback($connection);
           echo "Error recording sale: " . $e->getMessage();
       }
+
+     
+  
   }
 ?>
 <!DOCTYPE html>
@@ -103,7 +129,15 @@
                   </div>
                </div>
                <div class="functions-div">
-                  <div></div>
+                  <?php 
+                     $result = mysqli_query($connection, 'SELECT cash FROM cash');
+                     $displayCash = 0;
+                     $display = mysqli_fetch_all($result, MYSQLI_ASSOC);
+                     foreach ($display as $row) {
+                        $displayCash += $row['cash'];
+                     }
+                     echo "<div style='font-weight:bold'>Cash: ₱  $displayCash</div>"
+                  ?>
                   <div class="quantity-div">
                     <p class="quantity-number">Quantity: 0</p>
                   </div>
@@ -111,7 +145,7 @@
                      <p class="item-number">Total Items: 0</p>
                   </div>
                   <div class="grand-total-div ">
-                     <p class="grand-total">Grand Total: $0</p>
+                     <p class="grand-total">Grand Total: ₱0</p>
                   </div>
                   <div class="check-report waveeffect">
                      <i class="ri-file-chart-line icon" style="color:white"></i>
@@ -121,10 +155,14 @@
                      <i class="ri-time-line icon" style="color:white"></i>
                      <p style="color:white">Hourly Report</p>
                   </div>
-                  <div class="check-terminal-report waveeffect">
-                     <i class="ri-terminal-window-line icon" style="color:white"></i>
-                     <p style="color:white">Terminal Report</p>
-                  </div>
+                  <form action="user-pos.php" method="post">
+                     <button class="check-terminal-report waveeffect" type="submit" name="terminal-report-submit">
+                        <i class="ri-terminal-window-line icon" style="color:white; font-weight: bold; font-size: 1.1em"></i>
+                        <p style="color:white; font-weight: bold; font-size:1.1em">Terminal Report</p>
+                     </button>
+                  </form>
+
+              
                   <div class="pay-div waveeffect">
                      <i class="ri-cash-line icon" style="color:white"></i>
                      <p style="color:white">Pay All</p>
@@ -145,7 +183,7 @@
                                  <div class='item-div waveeffect' data-code={$row['code']}>
                                     <img src='../../assets/products/{$row['image']}' alt='hi'>
                                     <h3>{$row['name']}</h3>
-                                    <h5>$ {$row['price']}</h5>
+                                    <h5>₱{$row['price']}</h5>
                                     <h6>QTY: {$row['current_stock']}</h6>
                                     <p style='display:none'>{$row['category']}</p>
                                     <span style='display:none'>{$row['image']}</span>
@@ -185,7 +223,7 @@
             const { code } = item.dataset;
             const itemName = item.querySelector('h3').textContent;
             const itemStock = parseInt(item.querySelector('h6').textContent.split(':')[1].trim());
-            const itemPrice = parseFloat(item.querySelector('h5').textContent.replace('$', ''));
+            const itemPrice = parseFloat(item.querySelector('h5').textContent.replace('₱', ''));
             const itemQuantity = 1; // Set initial quantity to 1
             const itemSubtotal = itemPrice * itemQuantity;
             const itemCategory = item.querySelector('p').textContent;
@@ -273,11 +311,11 @@
             tableDiv.appendChild(quantityDiv);
 
             const priceDiv = document.createElement('div');
-            priceDiv.textContent = `$${product.price.toFixed(2)}`;
+            priceDiv.textContent = `₱${product.price.toFixed(2)}`;
             tableDiv.appendChild(priceDiv);
 
             const subtotalDiv = document.createElement('div');
-            subtotalDiv.textContent = `$${product.subtotal.toFixed(2)}`;
+            subtotalDiv.textContent = `₱${product.subtotal.toFixed(2)}`;
             tableDiv.appendChild(subtotalDiv);
 
             const removeDiv = document.createElement('div');
@@ -291,7 +329,7 @@
             quantity += product.quantity;
          });
 
-         grandTotal.textContent = `Grand Total: $${total.toFixed(2)}`;
+         grandTotal.textContent = `Grand Total: ₱${total.toFixed(2)}`;
          quantityNumber.textContent = `Quantity: ${quantity}`;
          itemNumber.textContent = `Total Items: ${items}`;
 
@@ -313,29 +351,45 @@
       //Handle The Inserting
       const payAllDiv = document.querySelector('.pay-div');
       payAllDiv.addEventListener('click', () => {
-      if (productArray.length > 0) {
-         // Send the productArray data to the server
-         sendProductsToServer(productArray);
-      } else {
-         alert('No products to purchase!');
-      }
-      });
+         if (productArray.length > 0) {
+            // Send the productArray data to the server
+            sendProductsToServer(productArray);
+            window.open('user-receipt.php', '_blank');
+         } else {
+            alert('No products to purchase!');
+         }
+         });
 
       function sendProductsToServer(products) {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'user-pos.php', true);
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      xhr.onreadystatechange = function () {
-         if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            console.log(xhr.responseText);
-            // Reset the productArray and update the table
-            productArray.length = 0;
-            renderTable();
-         }
+         const xhr = new XMLHttpRequest();
+         xhr.open('POST', 'user-pos.php', true);
+         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+         xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+               console.log(xhr.responseText);
+               // Reset the productArray and update the table
+               productArray.length = 0;
+               renderTable();
+            }
       };
-      const data = 'products=' + JSON.stringify(products);
-      xhr.send(data);
+         const data = 'products=' + JSON.stringify(products);
+         xhr.send(data);
       }
+
+      document.querySelector('.check-report').addEventListener('click', () => {
+         window.open('user-sales-report.php', '_blank');
+      });
+
+      document.querySelector('.check-hourly-report').addEventListener('click', () => {
+         window.open('user-hourly-report.php', '_blank');
+      });
+
+      document.querySelector('.check-terminal-report').addEventListener('click', () => {
+         window.open('user-terminal-report.php', '_blank');
+      });
+
+
+
    </script>
 </body>
 </html>

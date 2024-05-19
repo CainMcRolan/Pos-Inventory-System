@@ -19,87 +19,46 @@
    //Generate TitleCase Username for Display
    $username = titleCase($_SESSION['username']);
 
-   //Handles Product Submission (Insert Query)
-   if (isset($_POST['product_submit'])) {
-      $code = generateSecureUniqueCode($length = 6);
-      $product_name = mysqli_real_escape_string($connection, $_POST['product_name']);
-      $product_price = mysqli_real_escape_string($connection, $_POST['product_price']);
-      $product_category = mysqli_real_escape_string($connection, $_POST['product_category']);
-      $product_description = mysqli_real_escape_string($connection, $_POST['product_description']);
-      $product_count = mysqli_real_escape_string($connection, $_POST['product_count']);
-      $product_delivery = mysqli_real_escape_string($connection, $_POST['product_delivery']);
-      $product_transfer = mysqli_real_escape_string($connection, $_POST['product_transfer']);
-      $product_wasteges = mysqli_real_escape_string($connection, $_POST['product_wasteges']);
-      $product_pullout = mysqli_real_escape_string($connection, $_POST['product_pullout']);
-      $product_return = mysqli_real_escape_string($connection, $_POST['product_return']);
-      $product_stock = (int) $product_delivery + (int) $product_transfer + (int) $product_return - (int) $product_wasteges - (int) $product_pullout;
-      $variance = (int) $product_stock - (int) $product_count;
-
-      //Handles Image Query
-      $target_dir = "../../assets/products/";
-      $target_file = $target_dir . basename($_FILES["product_image"]["name"]);
-      $uploadOk = 1;
-      $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-
-      $check = getimagesize($_FILES["product_image"]["tmp_name"]);
-      if ($check !== false) {
-            $uploadOk = 1;
-      } else {
-            echo "File is not an image.";
-            $uploadOk = 0;
-      }
-   
-      if ($uploadOk == 0) {
-         echo "Sorry, your file was not uploaded.";
-      } else {
-            if (move_uploaded_file($_FILES["product_image"]["tmp_name"], $target_file)) {
-               $product_image = basename($_FILES["product_image"]["name"]);
-            } else {
-               echo "Sorry, there was an error uploading your file.";
-            }
-      }
+   //Handles PullOut Submission (Insert Query)
+   if (isset($_POST['pullout_submit'])) {
+      $pullout_name = mysqli_real_escape_string($connection, $_POST['pullout_name']);
+      $pullout_input = mysqli_real_escape_string($connection, $_POST['pullout_input']);
 
       //Handle data insertion
-      $query = "INSERT INTO product (code, image, name, category, price, current_stock, physical_count, delivery, transfer, wasteges, pull_out, returns, variance, description) VALUES ('{$code}', '{$product_image}', '{$product_name}', '{$product_category}', '{$product_price}', '{$product_stock}', '{$product_count}', '{$product_delivery}', '{$product_transfer}', '{$product_wasteges}', '{$product_pullout}', '{$product_return}', '{$variance}', '{$product_description}')";
-
+      $query = "INSERT INTO cash (name, cash, cash_pull_out) VALUES ('{$pullout_name}', -" . $pullout_input . ", '{$pullout_input}')";
       $result = mysqli_query($connection, $query);
 
       if ($result) {
-         echo "Sign up successful!";
-         header('Location: admin-inventory.php');
+         header('Location: user-history.php');
          exit();
       } else {
          echo "Error: " . mysqli_error($connection);
       }
    }
 
-   //Delete Function 
-   if (isset($_POST['product_delete'])) {
-      $delete_code = mysqli_real_escape_string($connection, $_POST['delete_code']);
-      $query = "DELETE FROM product WHERE code = '{$delete_code}'";
-      $result = mysqli_query($connection, $query);
-      if ($result) {
-          header("Location: {$_SERVER['PHP_SELF']}");
-          exit();
-      } else {
-          echo "Error: " . mysqli_error($connection);
-      }
-   }
 
    //Handles Total Variables
    $result = mysqli_query($connection, 'select * from sale');
    $totalSales = 0;
-   $salesToday = 0;
-   $totalQuantitySold = 0;
+   $pullOutMoney = 0;
+   $totalMoney = 0;
    $receivedMoney = 0;
 
    if ($result) {
       $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
       foreach($categoryArray as $items) {
-         $salesToday++;
          $totalSales++;
          $receivedMoney += (int) $items['cash_received'];
-         $totalQuantitySold += (int) $items['sold'];
+      }
+   }
+
+   $result = mysqli_query($connection, 'select * from cash');
+   if ($result) {
+      $categoryArray = mysqli_fetch_all($result, MYSQLI_ASSOC);
+      foreach($categoryArray as $items) {
+         $pullOutMoney += (int) $items['cash_pull_out'];
+         $totalMoney += (int) $items['cash'];
+        
       }
    }
 ?>
@@ -167,7 +126,6 @@
               <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
             </svg>
           </button>
-          <button class="app-content-headerButton">Add Product</button>
         </div>
         <div class="inventory-container">
             <div class="requests waveeffect">
@@ -175,20 +133,25 @@
                <p class="">Total Sales</p>
             </div>
             <div class="total-amount waveeffect">
-               <h1><?= $salesToday ?></h1>
-               <p class="">Sales Today</p>
+               <h1><?= '₱' . $receivedMoney ?></h1>
+               <p class="">Received Money</p>
             </div>
             <div class="total-paid-amount waveeffect">
-               <h1><?= $totalQuantitySold ?></h1>
-               <p class="">Total Quantity Sold</p>
+               <h1><?= '₱' . $pullOutMoney ?></h1>
+               <p class="">Pull Out Money</p>
             </div>
             <div class="total-purchase-due waveeffect">
-               <h1><?= '₱' . $receivedMoney ?></h1>
-               <p class="">Total Received Money</p>
+               <h1><?= '₱' . $totalMoney ?></h1>
+               <p class="">Total Cash</p>
             </div>
-            <div class="purchase-list">
+            <div class="purchase-list-user">
                <h1>Sales List</h1>
-               <button class="app-content-headerButton">Print Record</button>
+               <form method="POST" action="user-history.php" class="user-history-form">
+                  <input type="number" id="input_number" name="pullout_input" placeholder="Insert Number">
+                  <input type="hidden" name="pullout_name" value="<?= $_SESSION['username'] ?>">
+                  <input type="submit" name="pullout_submit" value="Pull Out">
+               </form>
+               <button class="app-content-headerButton print_record">Print Record</button>
                <div class="user-history-table">
                   <div>Sales Date</div>
                   <div>Code</div>
@@ -217,7 +180,7 @@
                               echo "<div>" . $row['price'] . "</div>";
                               echo "<div>" . $row['sold'] . "</div>";
                               echo "<div>" . $row['method'] . "</div>";
-                              echo "<div>" . $row['cash_received'] . "</div>";
+                              echo "<div>" . '₱' . $row['cash_received'] . "</div>";
                               echo "<div>" . $row['cashier_name'] . "</div>";
                             }
                         } 
@@ -233,5 +196,10 @@
    <script>
    </script>
    <script src="../../app/toggle.js"></script>
+   <script>
+        document.querySelector('.print_record').addEventListener('click', () => {
+         window.location.href = '../report/sales-report.php';
+      });
+   </script>
 </body>
 </html>
