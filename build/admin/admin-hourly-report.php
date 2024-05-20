@@ -5,16 +5,18 @@
    
    //Check if user is logged in
    if (!isset($_SESSION['id'])) {
-      header('Location: ../../signin.php');
+      header('Location: ../../index.php');
       exit();
    }
 
    //Hande Logout
    if (isset($_POST['logout_session'])) {
       session_destroy();
-      header("Location: ../../signin.php");
+      header("Location: ../../index.php");
       exit;
    }
+
+   date_default_timezone_set('Asia/Manila');
    
    //Generate TitleCase Username for Display
    $username = titleCase($_SESSION['username']);
@@ -43,8 +45,9 @@
    if ($_SERVER["REQUEST_METHOD"] == "POST") {
       // Retrieve the selected date from the form
       $selected_date = $_POST["report-date"];
+      $selected_hour = $_POST["report-time"];
       $_SESSION['$selected_date'] = $selected_date;
-  
+      $_SESSION['$selected_hour'] = $selected_hour;
   } else {
   }
 ?>
@@ -105,7 +108,7 @@
          <div class="account-info-name"><?= $username ?></div>
 
          <!-- Handle Logout Query -->
-         <form method="POST" action="../../signin.php" class="account-info-more">
+         <form method="POST" action="../../index.php" class="account-info-more">
             <button type="submit" class="account-info-more" name="logout_session">
                <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
                      <path d="M17 16L21 12M21 12L17 8M21 12L7 12M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -126,29 +129,45 @@
           </button>
         </div>
         <div class="report-container">
-            <div class="requests waveeffect hourly-report">
-               <h1><?= $pendingRequest; ?></h1>
-               <p class="">Hourly Report</p>
+        <div class="requests waveeffect hourly-report">
+               <h1>Hourly Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="total-amount waveeffect sales-report">
-               <h1><?= $pendingQuantity ?></h1>
-               <p class="">Sales Report</p>
+               <h1>Sales Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="total-paid-amount waveeffect cashier-report">
-               <h1><?= $totalSupplier ?></h1>
-               <p class="">Cashier's Report</p>
+               <h1>Cashier Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="total-purchase-due waveeffect product-report">
-               <h1><?= $totalItemPrice ?></h1>
-               <p class="">Product Report</p>
+               <h1>Product Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="total-purchase-due waveeffect cash-report">
-               <h1><?=  $totalItemPrice ?></h1>
-               <p class="">Cash Report</p>
+               <h1>Cash Report</h1>
+               <p class="">Click to View</p>
             </div>
-            <div class="report-list-2">
+            <div class="report-list-2 report-list-3">
                <h1>Hourly Report</h1>
-               <form action="admin-hourly-report.php" method="post" class="sort-form">
+               <form action="admin-hourly-report.php" method="post" class="sort-form-2">
+                  <select id="hours" name="report-time">
+                     <option value="08" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '8' ? 'selected' : ''; ?>>8am - 9am</option>
+                     <option value="09" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '9' ? 'selected' : ''; ?>>9am - 10am</option>
+                     <option value="10" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '10' ? 'selected' : ''; ?>>10am - 11am</option>
+                     <option value="11" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '11' ? 'selected' : ''; ?>>11am - 12pm</option>
+                     <option value="12" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '12' ? 'selected' : ''; ?>>12pm - 1pm</option>
+                     <option value="13" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '13' ? 'selected' : ''; ?>>1pm - 2pm</option>
+                     <option value="14" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '14' ? 'selected' : ''; ?>>2pm - 3pm</option>
+                     <option value="15" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '15' ? 'selected' : ''; ?>>3pm - 4pm</option>
+                     <option value="16" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '16' ? 'selected' : ''; ?>>4pm - 5pm</option>
+                     <option value="17" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '17' ? 'selected' : ''; ?>>5pm - 6pm</option>
+                     <option value="18" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '18' ? 'selected' : ''; ?>>6pm - 7pm</option>
+                     <option value="19" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '19' ? 'selected' : ''; ?>>7pm - 8pm</option>
+                     <option value="20" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '20' ? 'selected' : ''; ?>>8pm - 9pm</option>
+                     <option value="21" <?php echo ($_SESSION['$selected_hour'] ?? date('H')) == '21' ? 'selected' : ''; ?>>9pm - 10pm</option>
+                  </select>
                   <input type="date" id="report-date" name="report-date" class="app-content-headerButton" value="<?php echo $_SESSION['$selected_date'] ?? date('Y-m-d') ?>">
                   <button type="submit" class="app-content-headerButton">Print Report</button>
                </form>

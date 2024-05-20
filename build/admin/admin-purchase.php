@@ -4,8 +4,15 @@
    session_start();
    
    if (!isset($_SESSION['id'])) {
-      header('Location: ../../signin.php');
+      header('Location: ../../index.php');
       exit();
+   }
+
+    //Hande Logout
+    if (isset($_POST['logout_session'])) {
+      session_destroy();
+      header("Location: ../../index.php");
+      exit;
    }
 
    $result = mysqli_query($connection, "SELECT * FROM user WHERE id = {$_SESSION['id']}");
@@ -55,11 +62,11 @@
                   }
               } else {
                   // Product doesn't exist, insert a new row
-                  $query = "INSERT INTO product (code, name, price, delivery, current_stock) VALUES ('$code', '$name', '$price', '$quantity', '$quantity')";
+                  $query = "INSERT INTO product (code, name, price, delivery, current_stock, category) VALUES ('$code', '$name', '$price', '$quantity', '$quantity', 'UPDATE PRODUCT INFO')";
                   $result = mysqli_query($connection, $query);
   
                   if ($result) {
-                      header('Location: admin-purchase.php');
+                      header('Location: admin-inventory.php');
                       exit();
                   } else {
                       echo "Error: " . mysqli_error($connection);
@@ -164,7 +171,7 @@
          <img src="https://images.unsplash.com/photo-1527736947477-2790e28f3443?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTE2fHx3b21hbnxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=900&q=60" alt="Account">
          </div>
          <div class="account-info-name"><?= $username ?></div>
-            <form method="POST" action="../../signin.php" class="account-info-more">
+            <form method="POST" action="../../index.php" class="account-info-more">
                <button type="submit" class="account-info-more" name="logout_session">
                   <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M17 16L21 12M21 12L17 8M21 12L7 12M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -231,10 +238,12 @@
                                     echo "<div style='color: red;'>" . $row['status'] . "</div>";
                                     $buttonColor = 'red';
                                     $status = 'Pay';
+                                    $newType = 'submit';
                                  } else if ($row['status'] == 'paid') {
                                     echo "<div style='color: green;'>" . $row['status'] . "</div>";
                                     $buttonColor = 'green';
                                     $status = 'Paid';
+                                    $newType = 'hidden';
                                  }
                      
                                  echo "<div>" . $row['code'] . "</div>";
@@ -247,7 +256,7 @@
                                  echo "<div>
                                           <form action='{$_SERVER['PHP_SELF']}' method='POST' class='myForm new-product-form accept-form'>
                                              <input type='hidden' value='{$row['code']}' name='request_code'>
-                                             <input type='submit' class='app-content-headerButton-red edit-button accept-button' style='color: white; background-color: $buttonColor;' value='$status' name='request_submit'>
+                                             <input type='$newType' class='app-content-headerButton-red edit-button accept-button' style='color: white; background-color: $buttonColor;' value='$status' name='request_submit'>
                                           </form>
                                     </div>";
                                        }

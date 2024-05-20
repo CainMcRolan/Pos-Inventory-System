@@ -1312,6 +1312,37 @@
 }
 
 /* Solely for Admin Report */
+/* Solely for Admin Hours */
+#hours {
+	background-color: var(--action-color);
+	color: white;
+	height: 46%;
+	border: none;
+	border-radius: 5px;
+}
+
+.report-list-3 {
+	grid-template: 1fr 9fr / 9fr 3fr;
+}
+
+.sort-form-2 {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+}
+
+
+/* Solely for Admin Hours */
+
+.restock-dialog {
+	height: 35vh;
+}
+
+.restock-dialog > form {
+	grid-template-rows: repeat(4, 5em);
+}
+
+
 
  .tableView .products-header {
 	 display: flex;

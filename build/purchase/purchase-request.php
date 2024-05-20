@@ -5,14 +5,14 @@
    
    //Check if user is logged in
    if (!isset($_SESSION['id'])) {
-      header('Location: ../../signin.php');
+      header('Location: ../../index.php');
       exit();
    }
 
    //Hande Logout
    if (isset($_POST['logout_session'])) {
       session_destroy();
-      header("Location: ../../signin.php");
+      header("Location: ../../index.php");
       exit;
    }
 
@@ -40,6 +40,31 @@
          echo "Error: " . mysqli_error($connection);
       }
    }
+
+   //Restock
+   if (isset($_POST['restock_submit'])) {
+      $purchase_code = mysqli_real_escape_string($connection, $_POST['restock_code']);
+      $purchase_supplier = mysqli_real_escape_string($connection, $_POST['restock_supplier']);
+      $purchase_name = mysqli_real_escape_string($connection, $_POST['restock_name']);
+      $purchase_quantity = mysqli_real_escape_string($connection, $_POST['restock_quantity']);
+      $result = mysqli_query($connection, "SELECT price FROM product WHERE name = '$purchase_name'");
+      $row = mysqli_fetch_assoc($result);
+      $purchase_price = $row['price'];
+      $purchase_status = 'request';
+
+      //Handle data insertion
+      $query = "INSERT INTO request (code, supplier, name, quantity, price, status)  VALUES ('$purchase_code', '$purchase_supplier', '$purchase_name', '$purchase_quantity', '$purchase_price', '$purchase_status')";
+
+      $result = mysqli_query($connection, $query);
+
+      if ($result) {
+         header('Location: purchase-request.php');
+         exit();
+      } else {
+         echo "Error: " . mysqli_error($connection);
+      }
+   }
+   
 
    //Handles Total Variables
    $result = mysqli_query($connection, "select * from request where status = 'request'");
@@ -107,7 +132,7 @@
          <div class="account-info-name"><?= $username ?></div>
 
          <!-- Handle Logout Query -->
-         <form method="POST" action="../../signin.php" class="account-info-more">
+         <form method="POST" action="../../index.php" class="account-info-more">
             <button type="submit" class="account-info-more" name="logout_session">
                <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
                      <path d="M17 16L21 12M21 12L17 8M21 12L7 12M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -146,8 +171,8 @@
             </div>
             <div class="request-request-list">
                <h1>Pending Requests</h1>
-               <button class="app-content-headerButton">Print Record</button>
-               <button class="app-content-headerButton new-item" style="background-color:green">New Request</button>
+               <button class="app-content-headerButton restock" style="background-color:red; font-weight:bold">Restock</button>
+               <button class="app-content-headerButton new-item" style="background-color:green;  font-weight:bold">New Request</button>
                <div class="purchase-request-table">
                   <div>Code</div>
                   <div>Supplier</div>
@@ -202,6 +227,34 @@
                </div>
             </form>
          </dialog>
+         <dialog class="dialog2 account_dialog restock-dialog">
+            <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" class="myForm new-user-form" enctype="multipart/form-data"> 
+               <label>Item Name:</label>
+               <input type="hidden" name="restock_code" class="inputs" value="<?= generateSecureUniqueCode(3) ?>" readonly>   
+               <select name="restock_name">
+                  <?php
+                     $result = mysqli_query($connection, "SELECT name FROM product");
+
+                     if (mysqli_num_rows($result) > 0) {
+                        // Loop through each row and create an option for each product name
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            echo "<option value='{$row['name']}'>{$row['name']}</option>";
+                        }
+                     } else {
+                        echo "<option value=''>No products available</option>";
+                     }
+                  ?>
+               </select>
+               <label>Supplier:</label>
+               <input type="text" name="restock_supplier" placeholder="Supplier" class="inputs" required>
+               <label>Quantity:</label>
+               <input type="number" name="restock_quantity" placeholder="Quantity" class="inputs" required>
+               <div class="actions">
+                  <input type="button" value="Cancel" class="formButtons app-content-headerButton restock-cancel">
+                  <input type="submit" value="Submit" name="restock_submit" class="formButtons app-content-headerButton submit">
+               </div>
+            </form>
+         </dialog>
       </div>
    </div>
    </div>
@@ -216,6 +269,17 @@
 
       document.querySelector('.cancel').onclick = () => {
          dialog.close();
+      };
+
+      const toggleButton2 = document.querySelector('.restock');
+      const restock = document.querySelector('.restock-dialog')
+
+      toggleButton2.addEventListener('click', () => {
+         restock.showModal();
+      })
+
+      document.querySelector('.restock-cancel').onclick = () => {
+         restock.close();
       };
    </script>
 </body>

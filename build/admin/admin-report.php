@@ -5,14 +5,14 @@
    
    //Check if user is logged in
    if (!isset($_SESSION['id'])) {
-      header('Location: ../../signin.php');
+      header('Location: ../../index.php');
       exit();
    }
 
    //Hande Logout
    if (isset($_POST['logout_session'])) {
       session_destroy();
-      header("Location: ../../signin.php");
+      header("Location: ../../index.php");
       exit;
    }
    
@@ -105,7 +105,7 @@
          <div class="account-info-name"><?= $username ?></div>
 
          <!-- Handle Logout Query -->
-         <form method="POST" action="../../signin.php" class="account-info-more">
+         <form method="POST" action="../../index.php" class="account-info-more">
             <button type="submit" class="account-info-more" name="logout_session">
                <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
                      <path d="M17 16L21 12M21 12L17 8M21 12L7 12M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -126,25 +126,25 @@
           </button>
         </div>
         <div class="report-container">
-            <div class="requests waveeffect hourly-report">
-               <h1><?= $pendingRequest; ?></h1>
-               <p class="">Hourly Report</p>
+              <div class="requests waveeffect hourly-report">
+               <h1>Hourly Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="total-amount waveeffect sales-report">
-               <h1><?= $pendingQuantity ?></h1>
-               <p class="">Sales Report</p>
+               <h1>Sales Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="total-paid-amount waveeffect cashier-report">
-               <h1><?= $totalSupplier ?></h1>
-               <p class="">Cashier's Report</p>
+               <h1>Cashier Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="total-purchase-due waveeffect product-report">
-               <h1><?= $totalItemPrice ?></h1>
-               <p class="">Product Report</p>
+               <h1>Product Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="total-purchase-due waveeffect cash-report">
-               <h1><?=  $totalItemPrice ?></h1>
-               <p class="">Cash Report</p>
+               <h1>Cash Report</h1>
+               <p class="">Click to View</p>
             </div>
             <div class="report-list-2">
                <h1>Terminal Report</h1>

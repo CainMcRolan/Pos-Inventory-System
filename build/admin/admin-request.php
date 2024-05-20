@@ -5,14 +5,14 @@
    
    //Check if user is logged in
    if (!isset($_SESSION['id'])) {
-      header('Location: ../../signin.php');
+      header('Location: ../../index.php');
       exit();
    }
 
    //Hande Logout
    if (isset($_POST['logout_session'])) {
       session_destroy();
-      header("Location: ../../signin.php");
+      header("Location: ../../index.php");
       exit;
    }
    
@@ -129,7 +129,7 @@
          <div class="account-info-name"><?= $username ?></div>
 
          <!-- Handle Logout Query -->
-         <form method="POST" action="../../signin.php" class="account-info-more">
+         <form method="POST" action="../../index.php" class="account-info-more">
             <button type="submit" class="account-info-more" name="logout_session">
                <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
                      <path d="M17 16L21 12M21 12L17 8M21 12L7 12M13 16V17C13 18.6569 11.6569 20 10 20H6C4.34315 20 3 18.6569 3 17V7C3 5.34315 4.34315 4 6 4H10C11.6569 4 13 5.34315 13 7V8" stroke="#374151" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>

@@ -232,6 +232,11 @@
 
             const existingProduct = productArray.find(product => product.code === code);
 
+            if (itemStock <= 0) {
+               alert('No Stock Available!');
+               return;
+            }
+
             if (existingProduct) {
                // If the product already exists in the array, increment the quantity
                existingProduct.quantity += itemQuantity;
@@ -291,7 +296,7 @@
 
             const quantityDiv = document.createElement('div');
             const quantitySelect = document.createElement('select');
-            for (let i = 1; i <= 20; i++) {
+            for (let i = 1; i <= 9; i++) {
                const option = document.createElement('option');
                option.value = i;
                option.textContent = i;
@@ -377,15 +382,15 @@
       }
 
       document.querySelector('.check-report').addEventListener('click', () => {
-         window.open('user-sales-report.php', '_blank');
+         window.open('../report/sales-report.php', '_blank');
       });
 
       document.querySelector('.check-hourly-report').addEventListener('click', () => {
-         window.open('user-hourly-report.php', '_blank');
+         window.open('../report/hourly-report.php', '_blank');
       });
 
       document.querySelector('.check-terminal-report').addEventListener('click', () => {
-         window.open('user-terminal-report.php', '_blank');
+         window.open('../report/terminal-report.php', '_blank');
       });
 
 
