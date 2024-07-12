@@ -9,6 +9,11 @@ The Point of Sales and Inventory System is a system that is made for small store
 ![Images](screenshots/pos.png)
 ![Images](screenshots/inventory.png)
 
+## 📍 Demo
+
+Check out the live demo of the project [Point of Sales and Inventory System](https://shimijallores.000webhostapp.com).
+⚠️Note: It is not a phising website, it is flagged because i used a free hosting service because I am too broke to maintin a paid host.
+
 ## 🚀 Features
 
 - **User Authentication:** Secure login system for users.
